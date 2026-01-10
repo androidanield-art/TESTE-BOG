@@ -544,8 +544,7 @@ export default function App() {
     try {
       const data = await generatePresentationContent(cartItems, clientName, projectName);
       if (!data) {
-        alert("Erro ao gerar conteúdo com IA.");
-        return;
+        throw new Error("Dados não foram gerados corretamente.");
       }
       
       // Programmatically append the Service List Slide
@@ -562,9 +561,9 @@ export default function App() {
         slides: [...data.slides, serviceSlide]
       });
       setShowPresentation(true);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Erro ao gerar apresentação.");
+      alert(`Erro: ${e.message}\n\nVerifique o console (F12) para mais detalhes.`);
     } finally {
       setIsGenerating(false);
     }

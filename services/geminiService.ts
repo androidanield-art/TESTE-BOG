@@ -3,9 +3,12 @@ import { SelectedService, PresentationData } from "../types";
 
 const createClient = () => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    console.warn("API_KEY not found in environment variables.");
-    return null;
+  
+  // Debug log (will show in browser console F12)
+  console.log("Checking API Key...", apiKey ? "Key exists (starts with " + apiKey.substring(0, 4) + ")" : "Key is MISSING");
+
+  if (!apiKey || apiKey.includes("cole_sua_chave_aqui")) {
+    throw new Error("API_KEY não encontrada. Crie o arquivo .env na raiz com sua chave.");
   }
   return new GoogleGenAI({ apiKey });
 };
@@ -14,9 +17,15 @@ export const generatePresentationContent = async (
   services: SelectedService[],
   clientName: string,
   projectName: string
-): Promise<PresentationData | null> => {
-  const ai = createClient();
-  if (!ai) return null;
+): Promise<PresentationData> => { // Changed return type to throw error instead of null
+  
+  let ai;
+  try {
+    ai = createClient();
+  } catch (e: any) {
+    console.error("Client Init Error:", e);
+    throw e;
+  }
 
   const serviceList = services.map(s => `- ${s.name} (${s.description})`).join('\n');
 
@@ -74,7 +83,7 @@ export const generatePresentationContent = async (
     });
 
     const text = response.text;
-    if (!text) return null;
+    if (!text) throw new Error("A IA retornou uma resposta vazia.");
     
     const parsed = JSON.parse(text);
     
@@ -85,8 +94,10 @@ export const generatePresentationContent = async (
     }));
 
     return parsed as PresentationData;
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    return null;
+  } catch (error: any) {
+    console.error("Gemini API Error Full Details:", error);
+    // Extract a more meaningful error message if possible
+    const message = error.message || "Erro desconhecido na API Gemini";
+    throw new Error(`Erro na IA: ${message}`);
   }
 };
