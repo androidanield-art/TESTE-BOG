@@ -1,0 +1,5 @@
+{
+  "name": "Service Canvas Builder",
+  "description": "A drag-and-drop service package builder with AI proposal generation.",
+  "requestFramePermissions": []
+}
