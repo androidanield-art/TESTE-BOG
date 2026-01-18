@@ -1,6 +1,4 @@
-
 import { SelectedService, PresentationData, PresentationSlide } from "../types";
-import { CATEGORIES } from "../constants";
 
 export const generateStaticPresentation = (
   services: SelectedService[],
@@ -55,23 +53,9 @@ export const generateStaticPresentation = (
     ]
   };
 
-  // Slide 5: Orçamento Profissional (Investimento)
+  // Slide 5: Fechamento (Sem orçamento)
   const slide5: PresentationSlide = {
-    id: 'slide-investment',
-    type: 'budget',
-    title: 'INVESTIMENTO ESTRATÉGICO',
-    subtitle: 'Valores detalhados para a implementação do ecossistema completo.',
-    content: [
-      "Validade da Proposta: 07 dias corridos.",
-      "Condições: 50% de entrada e 50% na entrega da arquitetura.",
-      "Início: Imediato após aprovação e kickoff."
-    ],
-    servicesList: services
-  };
-
-  // Slide 6: Fechamento
-  const slide6: PresentationSlide = {
-    id: 'slide-7',
+    id: 'slide-5',
     type: 'closing',
     title: 'ANTES DE ESCALAR, ORGANIZE.',
     subtitle: 'Vamos conversar sobre como implementar esse ecossistema no seu negócio?',
@@ -79,7 +63,7 @@ export const generateStaticPresentation = (
   };
 
   return {
-    title: `Proposta - ${clientName}`,
-    slides: [slide1, slide2, slide3, slide4, slide5, slide6]
+    title: `Apresentação Estratégica - ${clientName}`,
+    slides: [slide1, slide2, slide3, slide4, slide5]
   };
 };
