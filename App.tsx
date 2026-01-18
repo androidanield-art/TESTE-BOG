@@ -22,9 +22,11 @@ import { SelectedService, ServiceItem, PresentationData } from './types';
 import { generateStaticPresentation } from './services/presentationGenerator';
 import { downloadPPT } from './services/pptGenerator';
 import { Logo } from './Logo';
-import { Plus, Trash2, GripVertical, Printer, ArrowLeft, ShieldCheck, Box, X, Calculator, Sparkles, Presentation, FileText, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Printer, ArrowLeft, ShieldCheck, Box, X, Calculator, Sparkles, Presentation, FileText, CheckCircle, Camera } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+// @ts-ignore
+import html2canvas from 'html2canvas';
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(...inputs));
@@ -201,7 +203,7 @@ const BudgetDocumentView: React.FC<{
 
   return (
     <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8 print:p-0 print:bg-white print:static print:overflow-visible">
-      <div className="max-w-4xl mx-auto space-y-8 pb-20 print:p-0 print:m-0 print:max-w-none print:space-y-0">
+      <div className="max-w-4xl mx-auto space-y-8 pb-20 print:p-0 print:m-0 print:max-w-none print:space-y-0 print:w-full">
         <div className="flex justify-between items-start no-print p-4 md:p-0">
             <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-800 font-bold text-xs">
                 <ArrowLeft className="w-4 h-4" /> Voltar ao Builder
@@ -212,7 +214,7 @@ const BudgetDocumentView: React.FC<{
         </div>
 
         {/* Proposta Comercial - Formatada como A4 Retrato */}
-        <div className="bg-white text-zinc-900 p-8 md:p-16 shadow-2xl min-h-[1123px] flex flex-col print:shadow-none print:m-0 print:rounded-none print:border-none print-portrait">
+        <div className="bg-white text-zinc-900 p-8 md:p-16 shadow-2xl min-h-[297mm] flex flex-col print:shadow-none print:m-0 print:border-none print-portrait">
             <div className="flex justify-between items-center border-b-2 border-zinc-900 pb-8 mb-12">
                 <Logo className="h-10 w-auto text-zinc-900" />
                 <div className="text-right">
@@ -439,6 +441,33 @@ export default function App() {
     setShowPresentation(true);
   };
 
+  // Função para Screenshot da Tela Inteira
+  const handleScreenshot = async () => {
+    const element = document.getElementById('main-builder-area');
+    if (!element) return;
+
+    try {
+      // Captura o canvas em alta resolução
+      const canvas = await html2canvas(element, {
+        scale: 2, // Melhora a qualidade
+        backgroundColor: '#09090b', // Garante o fundo preto
+        useCORS: true,
+        logging: false,
+        height: element.scrollHeight, // Captura a altura total, incluindo scroll
+        windowHeight: element.scrollHeight
+      });
+
+      // Cria o link de download
+      const link = document.createElement('a');
+      link.download = `Ecossistema_${clientName || 'Projeto'}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.9);
+      link.click();
+    } catch (error) {
+      console.error("Erro ao gerar screenshot:", error);
+      alert("Não foi possível gerar a imagem.");
+    }
+  };
+
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex h-screen font-sans overflow-hidden bg-[#09090b] text-zinc-100">
@@ -472,6 +501,15 @@ export default function App() {
             </div>
             
             <div className="flex items-center gap-4">
+                {/* Botão de Screenshot da Tela Inteira */}
+                <button 
+                  onClick={handleScreenshot}
+                  className="p-3 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all shadow-lg group"
+                  title="Salvar imagem do Ecossistema (JPG)"
+                >
+                  <Camera className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </button>
+
                 <button 
                     onClick={() => setIsBudgetOpen(true)} 
                     disabled={cartItems.length === 0} 
@@ -489,7 +527,7 @@ export default function App() {
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-12 no-scrollbar bg-[radial-gradient(circle_at_50%_50%,#18181b_0%,#09090b_100%)]">
+          <div id="main-builder-area" className="flex-1 overflow-y-auto p-12 no-scrollbar bg-[radial-gradient(circle_at_50%_50%,#18181b_0%,#09090b_100%)]">
             <DroppableZone items={cartItems} onRemove={id => setCartItems(p => p.filter(i => i.uniqueId !== id))} />
           </div>
         </main>

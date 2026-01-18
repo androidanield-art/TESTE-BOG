@@ -38,60 +38,64 @@
       @media print {
         @page {
           margin: 0;
+          size: auto; /* Permite que o navegador ajuste a orientação baseado no conteúdo */
         }
         
         html, body {
           width: 100%;
-          height: auto !important;
+          height: 100%;
           margin: 0 !important;
           padding: 0 !important;
-          background-color: white !important; /* Base branca para economia de tinta se não for fundo escuro */
+          background-color: white !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
-          overflow: visible !important;
-        }
-
-        /* Força fundo preto nos slides */
-        .print-bg-dark {
-          background-color: #09090b !important;
-          color: white !important;
         }
 
         .no-print {
           display: none !important;
         }
 
-        /* Formato A4 Vertical (Proposta) */
+        /* --- CONFIGURAÇÃO A4 VERTICAL (PROPOSTA) --- */
         .print-portrait {
           width: 210mm !important;
           min-height: 297mm !important;
+          padding: 15mm !important; /* Margem de segurança interna */
           margin: 0 auto !important;
-          padding: 20mm !important;
-          page-break-after: always;
+          background: white !important;
+          color: black !important;
+          position: relative !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* Quebra de página inteligente para tabelas na proposta */
+        tr {
+          page-break-inside: avoid;
         }
 
-        /* Formato A4 Paisagem (Slides) */
+        /* --- CONFIGURAÇÃO A4 HORIZONTAL (SLIDES) --- */
         .print-landscape {
           width: 297mm !important;
           height: 210mm !important;
-          margin: 0 !important;
-          padding: 15mm !important;
-          page-break-after: always;
-          display: flex !important;
-          flex-direction: column !important;
-          box-sizing: border-box !important;
-          overflow: hidden !important;
-        }
-
-        .slides-container {
           padding: 0 !important;
           margin: 0 !important;
-          width: 297mm !important;
+          page-break-after: always !important;
+          page-break-inside: avoid !important;
+          position: relative !important;
+          overflow: hidden !important;
+          display: flex !important;
+          flex-direction: column !important;
+          /* Força o background escuro nos slides */
+          background-color: #09090b !important;
+          color: white !important;
+          -webkit-print-color-adjust: exact !important; 
+          print-color-adjust: exact !important;
         }
 
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
+        /* Garante que o container dos slides não tenha margem */
+        .slides-container {
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
       }
 
@@ -131,7 +135,8 @@
     "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
     "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
     "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2",
-    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1"
+    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1"
   }
 }
 </script>
