@@ -59,24 +59,6 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
-      /* Prevenção de quebra de página em tabelas e itens longos no PDF */
-      @media print {
-        @page {
-            size: landscape;
-            margin: 0;
-        }
-        body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            background-color: #09090b !important;
-        }
-        .print-no-break {
-          page-break-inside: avoid;
-        }
-        .no-print {
-          display: none !important;
-        }
-      }
       
       /* Glassmorphism Utilities */
       .glass {
@@ -84,6 +66,54 @@
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      /* CSS CRÍTICO PARA IMPRESSÃO (PDF) */
+      @media print {
+        @page {
+            size: landscape; /* Força orientação paisagem */
+            margin: 0;
+        }
+        
+        html, body {
+            height: auto !important;
+            overflow: visible !important;
+            background-color: #09090b !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        /* Oculta tudo que não for a área de impressão */
+        #root > div {
+            display: none !important; 
+        }
+
+        /* Mostra apenas o container da apresentação */
+        .print-container {
+            display: block !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            z-index: 9999 !important;
+            background-color: #09090b !important;
+        }
+
+        /* Força quebra de página após cada slide */
+        .print-slide {
+            page-break-after: always !important;
+            break-after: always !important;
+            height: 100vh !important;
+            width: 100vw !important;
+            overflow: hidden !important;
+            display: flex !important;
+            background-color: #09090b !important;
+        }
+
+        .no-print {
+          display: none !important;
+        }
       }
     </style>
   <script type="importmap">
@@ -101,7 +131,7 @@
     "vite": "https://esm.sh/vite@^7.3.1",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
     "react/": "https://esm.sh/react@^19.2.3/",
-    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1"
+    "pptxgenjs": "https://esm.sh/pptxgenjs@^3.12.0"
   }
 }
 </script>

@@ -20,7 +20,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { CATEGORIES, SERVICES } from './constants';
 import { SelectedService, ServiceItem, PresentationData, PresentationSlide } from './types';
 import { generateStaticPresentation } from './services/presentationGenerator';
-import { exportToPPT } from './services/pptGenerator';
+import { downloadPPT } from './services/pptGenerator';
 import { Plus, Trash2, GripVertical, Printer, ArrowLeft, DollarSign, ShieldCheck, Box, X, Calculator, CheckCircle2, FileVideo, Sparkles, Presentation, MoreHorizontal } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -189,13 +189,6 @@ const BudgetModal: React.FC<{
 };
 
 const PresentationView: React.FC<{ data: PresentationData, clientName: string, projectName: string, onClose: () => void }> = ({ data, clientName, projectName, onClose }) => {
-  const totalPrice = data.slides.find(s => s.type === 'budget')?.servicesList?.reduce((acc: number, s: SelectedService) => {
-    const priceStr = s.price || '0';
-    const cleanPrice = priceStr.replace(/\./g, '').replace(',', '.');
-    const val = parseFloat(cleanPrice);
-    return acc + (isNaN(val) ? 0 : val);
-  }, 0) || 0;
-
   const BrandLogo = () => (
     <div className="flex items-center text-2xl tracking-tight select-none z-10">
       <span className="font-normal text-white">Build</span>
@@ -205,14 +198,18 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-black overflow-y-auto print:overflow-visible animate-fade-in">
-      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[100] print:hidden bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+    // Removido 'fixed inset-0 overflow-y-auto' para permitir que o CSS de impressão controle o fluxo
+    // Adicionado classe 'print-container' para o CSS de impressão
+    <div className="fixed inset-0 z-50 bg-black overflow-y-auto print:static print:overflow-visible print:bg-black print:z-auto animate-fade-in print-container">
+      
+      {/* Header controls - Hidden on Print */}
+      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[100] no-print bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
         <button onClick={onClose} className="pointer-events-auto flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/80 backdrop-blur px-4 py-2 rounded-full border border-zinc-800 transition-all hover:border-zinc-600">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
         <div className="pointer-events-auto flex gap-4">
            <button 
-            onClick={() => exportToPPT(data, clientName)}
+            onClick={() => downloadPPT(data, clientName)}
             className="flex items-center gap-2 bg-white/10 text-white px-6 py-2 rounded-full font-bold hover:bg-white/20 transition-all border border-white/10 shadow-lg"
           >
             <Presentation className="w-4 h-4" /> Baixar PPT
@@ -223,10 +220,11 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
         </div>
       </div>
 
-      <div className="max-w-[297mm] mx-auto print:block">
+      <div className="max-w-[297mm] mx-auto print:max-w-none print:w-full">
         
         {data.slides.map((slide, index) => (
-          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-20 print:h-screen print:w-screen print:break-after-always overflow-hidden border-b border-zinc-900 print:border-none">
+          // Adicionado classe 'print-slide' para garantir quebra de página
+          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-20 print:p-12 print:h-screen print:w-screen print-slide overflow-hidden border-b border-zinc-900 print:border-none">
             {/* Background Elements */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#4ade80]/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
             
@@ -320,43 +318,6 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
                     </div>
                 </div>
               )}
-
-              {slide.type === 'budget' && (
-                <div className="flex flex-col h-full mt-8">
-                   <div className="flex justify-between items-end mb-16 border-b border-zinc-800 pb-8">
-                      <div>
-                        <h2 className="text-6xl font-black text-white mb-2 tracking-tighter">Proposta Comercial</h2>
-                        <p className="text-zinc-500 text-xl">Investimento estruturado para o ecossistema.</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-zinc-500 uppercase tracking-widest text-xs mb-2 font-bold">Investimento Total</p>
-                        <p className="text-6xl font-bold text-[#4ade80] tracking-tighter">R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                      </div>
-                   </div>
-
-                   <div className="grid grid-cols-2 gap-x-16 gap-y-0">
-                      {slide.servicesList?.map(s => (
-                        <div key={s.uniqueId} className="flex justify-between items-center py-6 border-b border-zinc-900 group">
-                           <div>
-                              <p className="font-bold text-xl text-zinc-200 group-hover:text-white transition-colors">{s.name}</p>
-                              <p className="text-xs text-zinc-600 mt-1 uppercase tracking-wider">{s.category} Module</p>
-                           </div>
-                           <p className="font-mono text-xl text-zinc-500 group-hover:text-[#4ade80] transition-colors">R$ {s.price || '0,00'}</p>
-                        </div>
-                      ))}
-                   </div>
-
-                   <div className="mt-auto pt-12 flex justify-between items-center text-zinc-500 text-sm">
-                      <div className="flex gap-12">
-                         <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Confidential Document</span>
-                         <span>Valid for 10 days</span>
-                      </div>
-                      <div className="uppercase tracking-widest font-bold text-[10px]">
-                          Powered by BuildOnGrowth
-                      </div>
-                   </div>
-                </div>
-              )}
             </div>
             
             <div className="absolute bottom-12 left-16 right-16 flex justify-between text-zinc-700 text-[10px] uppercase tracking-[0.2em] font-bold border-t border-zinc-900 pt-6">
@@ -430,23 +391,9 @@ export default function App() {
         return;
     }
 
-    // 1. Generate Static Content
+    // Generate ONLY Static Content (No Budget Slide Appended)
     const baseData = generateStaticPresentation(cartItems, clientName, projectName);
-    
-    // 2. Add Budget Slide (always add it, if prices are 0 they show as 0)
-    const budgetSlide: PresentationSlide = {
-        id: 'budget-slide',
-        type: 'budget',
-        title: 'Proposta Comercial',
-        content: [],
-        servicesList: cartItems
-    };
-
-    setPresentationData({
-        ...baseData,
-        slides: [...baseData.slides, budgetSlide]
-    });
-    
+    setPresentationData(baseData);
     setShowPresentation(true);
   };
 
@@ -455,7 +402,7 @@ export default function App() {
       <div className="flex h-screen font-sans overflow-hidden bg-[#09090b] text-zinc-100">
         
         {/* SIDEBAR */}
-        <aside className="w-80 flex flex-col border-r border-zinc-800 bg-[#0c0c0e] z-10">
+        <aside className="w-80 flex flex-col border-r border-zinc-800 bg-[#0c0c0e] z-10 print:hidden">
           <div className="p-6 border-b border-zinc-800">
             <h1 className="text-xl font-black italic tracking-tighter text-white">BUILD ON GROWTH</h1>
             <div className="flex items-center gap-2 mt-2">
@@ -478,7 +425,7 @@ export default function App() {
         </aside>
 
         {/* MAIN AREA */}
-        <main className="flex-1 flex flex-col relative">
+        <main className="flex-1 flex flex-col relative print:hidden">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
           
           <header className="h-24 border-b border-zinc-800 bg-[#09090b]/80 backdrop-blur-md flex items-center px-10 justify-between z-20">

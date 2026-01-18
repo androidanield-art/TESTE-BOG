@@ -2,7 +2,7 @@ import PptxGenJS from "pptxgenjs";
 import { PresentationData, SelectedService } from "../types";
 import { CATEGORIES } from "../constants";
 
-export const exportToPPT = (data: PresentationData, clientName: string) => {
+export const downloadPPT = (data: PresentationData, clientName: string) => {
   const pres = new PptxGenJS();
   
   // Set Slide Layout
@@ -35,6 +35,9 @@ export const exportToPPT = (data: PresentationData, clientName: string) => {
   });
 
   data.slides.forEach((slide, index) => {
+    // Skip budget slide if it somehow exists in data (redundant safety)
+    if (slide.type === 'budget') return;
+
     const s = pres.addSlide({ masterName: "MASTER_SLIDE" });
 
     // Footer with Page Number
@@ -54,12 +57,12 @@ export const exportToPPT = (data: PresentationData, clientName: string) => {
         x: 0.5, y: 2.0, fontSize: 10, color: ACCENT_COLOR, bold: true, charSpacing: 3
       });
       s.addText(slide.title, {
-        x: 0.5, y: 2.5, w: "90%",
+        x: 0.5, y: 2.5, w: 9.0, // Expanded width
         fontSize: 44, color: TEXT_COLOR, bold: true, align: "left", fontFace: "Arial Black"
       });
       if (slide.subtitle) {
         s.addText(slide.subtitle, {
-          x: 0.5, y: 4.2, w: "80%",
+          x: 0.5, y: 4.2, w: 8.5, // Expanded width
           fontSize: 20, color: SUBTEXT_COLOR, align: "left"
         });
         // Decorative side line
@@ -72,25 +75,25 @@ export const exportToPPT = (data: PresentationData, clientName: string) => {
     // --- SLIDE TYPE: CONTENT ---
     else if (slide.type === 'content') {
       s.addText(slide.title, {
-        x: 0.5, y: 1.2, w: "45%",
+        x: 0.5, y: 1.2, w: 4.0, // Fixed width for left column
         fontSize: 28, color: ACCENT_COLOR, bold: true, fontFace: "Arial Black"
       });
       if (slide.subtitle) {
         s.addText(slide.subtitle, {
-          x: 0.5, y: 2.2, w: "40%",
+          x: 0.5, y: 2.5, w: 4.0, // Fixed width
           fontSize: 14, color: SUBTEXT_COLOR
         });
       }
       
       // Vertical separator line
       s.addShape(pres.shapes.LINE, {
-        x: 5.0, y: 1.5, w: 0, h: 4.0, line: { color: BORDER_COLOR, width: 1 }
+        x: 4.8, y: 1.5, w: 0, h: 4.0, line: { color: BORDER_COLOR, width: 1 }
       });
 
-      // Content list
+      // Content list - Adjusted X to right side
       slide.content.forEach((point, i) => {
         s.addText(point, {
-          x: 5.5, y: 1.5 + (i * 0.9), w: "50%",
+          x: 5.2, y: 1.5 + (i * 0.9), w: 4.5, // Reduced width to fit slide
           fontSize: 16, color: TEXT_COLOR, 
           bullet: { code: "2022", color: ACCENT_COLOR }
         });
@@ -99,69 +102,36 @@ export const exportToPPT = (data: PresentationData, clientName: string) => {
 
     // --- SLIDE TYPE: SERVICE LIST ---
     else if (slide.type === 'service_list') {
-      s.addText(slide.title, { x: 0.5, y: 0.8, fontSize: 28, color: TEXT_COLOR, bold: true, fontFace: "Arial Black" });
-      if (slide.subtitle) s.addText(slide.subtitle, { x: 0.5, y: 1.4, fontSize: 12, color: SUBTEXT_COLOR });
+      s.addText(slide.title, { x: 0.5, y: 0.8, fontSize: 24, color: TEXT_COLOR, bold: true, fontFace: "Arial Black" });
+      if (slide.subtitle) s.addText(slide.subtitle, { x: 0.5, y: 1.3, fontSize: 12, color: SUBTEXT_COLOR });
 
       // Columns for categories
       let colX = 0.5;
-      const colWidth = 3.0;
+      const colWidth = 3.0; // Reduced column width slightly to fit 3 cols comfortably
       
       CATEGORIES.forEach(cat => {
         const items = slide.servicesList?.filter(i => i.category === cat.id);
         if (items && items.length > 0) {
             // Category Header box
             s.addShape(pres.shapes.RECT, {
-                x: colX, y: 2.0, w: colWidth, h: 0.4, 
+                x: colX, y: 1.8, w: colWidth, h: 0.4, 
                 fill: { color: "18181b" }, line: { color: BORDER_COLOR }
             });
             s.addText(cat.title, { 
-                x: colX, y: 2.0, w: colWidth, h: 0.4,
+                x: colX, y: 1.8, w: colWidth, h: 0.4,
                 fontSize: 10, color: ACCENT_COLOR, bold: true, align: "center", valign: "middle"
             });
             
             // Items
             items.forEach((item, k) => {
                 s.addText(item.name, { 
-                    x: colX, y: 2.5 + (k * 0.35), w: colWidth,
-                    fontSize: 9, color: TEXT_COLOR, bullet: { code: "25AA", color: "52525b" }
+                    x: colX, y: 2.3 + (k * 0.4), w: colWidth,
+                    fontSize: 10, color: TEXT_COLOR, bullet: { code: "25AA", color: "52525b" }
                 });
             });
             colX += 3.2; // Move to next column
         }
       });
-    }
-
-    // --- SLIDE TYPE: BUDGET ---
-    else if (slide.type === 'budget') {
-        s.addText("PROPOSTA COMERCIAL", { x: 0.5, y: 0.8, fontSize: 32, color: TEXT_COLOR, bold: true, fontFace: "Arial Black" });
-        s.addText("Investimento estruturado para o ecossistema.", { x: 0.5, y: 1.4, fontSize: 12, color: SUBTEXT_COLOR });
-        
-        let total = 0;
-        let startY = 2.0;
-        
-        slide.servicesList?.forEach((item) => {
-            const price = item.price || "0,00";
-            const cleanPrice = price.replace(/\./g, '').replace(',', '.');
-            const val = parseFloat(cleanPrice);
-            if (!isNaN(val)) total += val;
-
-            // Service Row
-            s.addText(item.name, { x: 0.5, y: startY, w: 6, fontSize: 12, color: TEXT_COLOR, bold: true });
-            s.addText(item.category.toUpperCase(), { x: 0.5, y: startY + 0.25, w: 6, fontSize: 8, color: SUBTEXT_COLOR });
-            
-            s.addText(`R$ ${price}`, { x: 7, y: startY, w: 3, fontSize: 12, color: ACCENT_COLOR, align: "right", fontFace: "Courier New" });
-            
-            // Divider
-            s.addShape(pres.shapes.LINE, { x: 0.5, y: startY + 0.45, w: 9.5, h: 0, line: { color: BORDER_COLOR } });
-            startY += 0.6;
-        });
-
-        // Total Section
-        const totalY = Math.max(startY + 0.5, 6.0);
-        s.addText("INVESTIMENTO TOTAL", { x: 6.0, y: totalY, w: 4.0, fontSize: 10, color: SUBTEXT_COLOR, align: "right" });
-        s.addText(`R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, { 
-            x: 5.0, y: totalY + 0.3, w: 5.0, fontSize: 24, color: ACCENT_COLOR, bold: true, align: "right" 
-        });
     }
 
     // --- SLIDE TYPE: CLOSING ---
