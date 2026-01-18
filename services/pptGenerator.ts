@@ -1,3 +1,5 @@
+
+
 import PptxGenJS from "pptxgenjs";
 import { PresentationData, SelectedService } from "../types";
 import { CATEGORIES } from "../constants";
@@ -5,10 +7,8 @@ import { CATEGORIES } from "../constants";
 export const downloadPPT = (data: PresentationData, clientName: string) => {
   const pres = new PptxGenJS();
   
-  // 16:9 Aspect Ratio
   pres.layout = "LAYOUT_16x9";
   
-  // Theme Variables
   const BG_COLOR = "09090b";
   const TEXT_COLOR = "FFFFFF";
   const ACCENT_COLOR = "4ade80";
@@ -16,7 +16,6 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
   const BORDER_COLOR = "27272a";
   const CARD_BG = "18181b";
 
-  // Master Slide Definition
   pres.defineSlideMaster({
     title: "MASTER_SLIDE",
     background: { color: BG_COLOR },
@@ -27,12 +26,8 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
   });
 
   data.slides.forEach((slide, index) => {
-    // We don't export the budget configuration slide
-    if (slide.type === 'budget') return;
-
     const s = pres.addSlide({ masterName: "MASTER_SLIDE" });
 
-    // Slide Number & Context Footer
     s.addText(`${clientName.toUpperCase()} | PROPOSTA ESTRATÉGICA`, {
       x: 0.5, y: "93%", w: "60%", fontSize: 9, color: SUBTEXT_COLOR, align: "left", fontFace: "Arial", bold: true
     });
@@ -40,7 +35,6 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
       x: "85%", y: "92%", w: "10%", fontSize: 9, color: ACCENT_COLOR, align: "right", fontFace: "Arial", bold: true
     });
 
-    // --- COVER SLIDE ---
     if (slide.type === 'cover') {
       s.addText("PROPOSTA ESTRATÉGICA", { 
         x: 0.6, y: 1.8, fontSize: 11, color: ACCENT_COLOR, bold: true, charSpacing: 4, fontFace: "Arial" 
@@ -61,9 +55,7 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
       }
     } 
     
-    // --- CONTENT SLIDE ---
     else if (slide.type === 'content') {
-      // Left Column (Title)
       s.addText(slide.title, {
         x: 0.5, y: 1.5, w: 3.2, fontSize: 28, color: ACCENT_COLOR, bold: true, fontFace: "Arial Black", italic: true
       });
@@ -72,83 +64,72 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
           x: 0.5, y: 2.8, w: 3.2, fontSize: 13, color: SUBTEXT_COLOR, italic: true
         });
       }
-      
-      // Vertical Separator
-      s.addShape(pres.ShapeType.line, { 
-        x: 4.2, y: 1.2, w: 0, h: 4.2, line: { color: BORDER_COLOR, width: 1.5 } 
-      });
+      s.addShape(pres.ShapeType.line, { x: 4.2, y: 1.2, w: 0, h: 4.2, line: { color: BORDER_COLOR, width: 1.5 } });
 
-      // Right Column (List Items)
       slide.content.forEach((point, i) => {
         s.addText(point, {
           x: 4.6, y: 1.5 + (i * 0.8), w: 4.8, fontSize: 16, color: TEXT_COLOR, fontFace: "Arial",
-          bullet: { code: "25CF" } // Solid Circle
+          bullet: { code: "25CF" }
         });
       });
     }
 
-    // --- SERVICE LIST (ECOSYSTEM GEARS) ---
     else if (slide.type === 'service_list') {
-      s.addText("ENGRENAGENS", { 
-        x: 0.5, y: 0.8, fontSize: 24, color: TEXT_COLOR, bold: true, fontFace: "Arial Black", italic: true 
-      });
-      if (slide.subtitle) {
-        s.addText(slide.subtitle, { 
-          x: 0.5, y: 1.25, fontSize: 12, color: SUBTEXT_COLOR, italic: true 
-        });
-      }
-
+      s.addText("ENGRENAGENS", { x: 0.5, y: 0.8, fontSize: 24, color: TEXT_COLOR, bold: true, fontFace: "Arial Black", italic: true });
       let colX = 0.5;
-      const colWidth = 2.9;
-      
       CATEGORIES.forEach(cat => {
         const items = slide.servicesList?.filter(i => i.category === cat.id);
         if (items && items.length > 0) {
-            // Category Box Header
-            s.addShape(pres.ShapeType.rect, { 
-              x: colX, y: 1.8, w: colWidth, h: 0.4, fill: { color: CARD_BG }, line: { color: BORDER_COLOR, width: 1 } 
-            });
-            s.addText(cat.title, { 
-              x: colX, y: 1.8, w: colWidth, h: 0.4, fontSize: 9, color: ACCENT_COLOR, bold: true, align: "center", valign: "middle", charSpacing: 2
-            });
-            
-            // Service items list
+            s.addShape(pres.ShapeType.rect, { x: colX, y: 1.8, w: 2.9, h: 0.4, fill: { color: CARD_BG }, line: { color: BORDER_COLOR, width: 1 } });
+            s.addText(cat.title, { x: colX, y: 1.8, w: 2.9, h: 0.4, fontSize: 9, color: ACCENT_COLOR, bold: true, align: "center", valign: "middle" });
             items.forEach((item, k) => {
-                s.addText(item.name, { 
-                  x: colX + 0.1, y: 2.35 + (k * 0.4), w: colWidth - 0.2, fontSize: 10, color: TEXT_COLOR, fontFace: "Arial", bold: true,
-                  bullet: { code: "25AA" } // Small Square
-                });
+                s.addText(item.name, { x: colX + 0.1, y: 2.35 + (k * 0.4), w: 2.7, fontSize: 10, color: TEXT_COLOR, fontFace: "Arial", bold: true, bullet: { code: "25AA" } });
             });
-            colX += 3.15; // Shift to next column
+            colX += 3.15;
         }
       });
     }
 
-    // --- CLOSING SLIDE ---
+    else if (slide.type === 'budget') {
+      s.addText("PROPOSTA COMERCIAL", { x: 0.5, y: 1.0, fontSize: 28, color: ACCENT_COLOR, bold: true, fontFace: "Arial Black", italic: true });
+      s.addText("DETALHAMENTO DE INVESTIMENTO", { x: 0.5, y: 1.4, fontSize: 12, color: SUBTEXT_COLOR, italic: true });
+
+      // Fix: Use object-based fill and ensure all cells have consistent option properties for TypeScript compatibility
+      const tableData: any[][] = [
+        [
+          { text: "SERVIÇO", options: { bold: true, color: ACCENT_COLOR, fill: { color: CARD_BG }, fontSize: 10, align: "left" } },
+          { text: "VALOR", options: { bold: true, color: ACCENT_COLOR, fill: { color: CARD_BG }, fontSize: 10, align: "right" } }
+        ]
+      ];
+
+      slide.servicesList?.forEach(svc => {
+        tableData.push([
+          { text: svc.name.toUpperCase(), options: { fontSize: 10, color: TEXT_COLOR, bold: false, fill: { color: BG_COLOR }, align: "left" } },
+          { text: `R$ ${svc.price || '0,00'}`, options: { fontSize: 11, color: TEXT_COLOR, align: "right", bold: true, fill: { color: BG_COLOR } } }
+        ]);
+      });
+
+      // Fix: Use Intl.NumberFormat instead of toLocaleString with arguments
+      const totalValue = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+        slide.servicesList?.reduce((acc, curr) => {
+          const val = parseFloat(curr.price?.replace(/\./g, '').replace(',', '.') || '0');
+          return acc + (isNaN(val) ? 0 : val);
+        }, 0) || 0
+      );
+
+      tableData.push([
+        { text: "INVESTIMENTO TOTAL", options: { bold: true, color: ACCENT_COLOR, fontSize: 14, fill: { color: BG_COLOR }, align: "left" } },
+        { text: `R$ ${totalValue}`, options: { bold: true, color: ACCENT_COLOR, fontSize: 16, align: "right", fill: { color: BG_COLOR } } }
+      ]);
+
+      s.addTable(tableData, { x: 0.5, y: 2.0, w: 9.0, colW: [7.0, 2.0], border: { type: "solid", color: BORDER_COLOR, pt: 1 } });
+    }
+
     else if (slide.type === 'closing') {
-        s.addText(slide.title, { 
-          x: 1.0, y: 2.2, w: "80%", fontSize: 38, color: TEXT_COLOR, bold: true, align: "center", fontFace: "Arial Black", italic: true 
-        });
-        if(slide.subtitle) {
-            s.addText(slide.subtitle, { 
-              x: 2.0, y: 3.5, w: "60%", fontSize: 16, color: SUBTEXT_COLOR, align: "center", italic: true 
-            });
-        }
-        
-        // Contact Card in PPT
-        s.addShape(pres.ShapeType.rect, { 
-          x: 3.4, y: 4.8, w: 3.2, h: 1.0, fill: { color: CARD_BG }, line: { color: BORDER_COLOR, width: 2 } 
-        });
-        s.addText("CONTATO ESTRATÉGICO", { 
-          x: 3.4, y: 5.0, w: 3.2, fontSize: 8, color: SUBTEXT_COLOR, align: "center", bold: true, charSpacing: 3 
-        });
-        s.addText("contato@buildongrowth.com", { 
-          x: 3.4, y: 5.35, w: 3.2, fontSize: 13, color: ACCENT_COLOR, align: "center", fontFace: "Courier New" 
-        });
+        s.addText(slide.title, { x: 1.0, y: 2.2, w: "80%", fontSize: 38, color: TEXT_COLOR, bold: true, align: "center", fontFace: "Arial Black", italic: true });
+        s.addText("contato@buildongrowth.com", { x: 3.4, y: 5.35, w: 3.2, fontSize: 13, color: ACCENT_COLOR, align: "center", fontFace: "Courier New" });
     }
   });
 
-  // Export File
-  const fileName = `ECOSSISTEMA_${clientName.replace(/\s+/g, '_').toUpperCase() || 'GROWTH'}.pptx`;
-  pres.writeFile({ fileName });
+  pres.writeFile({ fileName: `PROPOSTA_${clientName.replace(/\s+/g, '_').toUpperCase()}.pptx` });
 };

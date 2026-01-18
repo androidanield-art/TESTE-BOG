@@ -1,3 +1,4 @@
+
 import { SelectedService, PresentationData, PresentationSlide } from "../types";
 import { CATEGORIES } from "../constants";
 
@@ -30,35 +31,19 @@ export const generateStaticPresentation = (
     ]
   };
 
-  // Slide 3: A Solução
+  // Slide 3: Engrenagens
   const slide3: PresentationSlide = {
     id: 'slide-3',
-    type: 'content',
-    title: 'A SOLUÇÃO',
-    subtitle: 'Um ecossistema de growth orientado a dados, modelado à visão e cultura do gestor.',
-    content: [
-      "Marca & Posicionamento",
-      "Aquisição de Demanda",
-      "Conversão & Vendas",
-      "Tecnologia & Automação",
-      "Dados & Otimização"
-    ]
-  };
-
-  // Slide 4: Engrenagens (Dynamic Scope based on selection)
-  // We group the selected services by category to show "Unique Delivery"
-  const slide4: PresentationSlide = {
-    id: 'slide-4',
     type: 'service_list',
     title: 'AS ENGRENAGENS DO ECOSSISTEMA',
     subtitle: 'Diagnóstico do negócio e entendimento da cultura para uma entrega única.',
     content: [],
-    servicesList: services // Pass raw services, rendering will handle grouping
+    servicesList: services 
   };
 
-  // Slide 5: Metodologia
-  const slide5: PresentationSlide = {
-    id: 'slide-5',
+  // Slide 4: Implementação
+  const slide4: PresentationSlide = {
+    id: 'slide-4',
     type: 'content',
     title: 'IMPLEMENTAÇÃO',
     subtitle: 'Simples e prático de entender em 3 etapas.',
@@ -70,32 +55,31 @@ export const generateStaticPresentation = (
     ]
   };
 
-  // Slide 6: Impacto
-  const slide6: PresentationSlide = {
-    id: 'slide-6',
-    type: 'content',
-    title: 'O IMPACTO',
-    subtitle: 'Marketing e vendas alinhados ao propósito da marca.',
+  // Slide 5: Orçamento Profissional (Investimento)
+  const slide5: PresentationSlide = {
+    id: 'slide-investment',
+    type: 'budget',
+    title: 'INVESTIMENTO ESTRATÉGICO',
+    subtitle: 'Valores detalhados para a implementação do ecossistema completo.',
     content: [
-      "De: Marketing desconectado e leads sem contexto.",
-      "Para: Jornada clara e conectada à 'visão do dono'.",
-      "De: Vendas baseadas em queima de capital.",
-      "Para: Automações e dados confiáveis para conversão.",
-      "Resultado: Crescimento e conhecimento replicáveis."
-    ]
+      "Validade da Proposta: 07 dias corridos.",
+      "Condições: 50% de entrada e 50% na entrega da arquitetura.",
+      "Início: Imediato após aprovação e kickoff."
+    ],
+    servicesList: services
   };
 
-  // Slide 7: Fechamento
-  const slide7: PresentationSlide = {
+  // Slide 6: Fechamento
+  const slide6: PresentationSlide = {
     id: 'slide-7',
     type: 'closing',
     title: 'ANTES DE ESCALAR, ORGANIZE.',
-    subtitle: 'Vamos conversar sobre como implementar um ecossistema de growth no seu negócio?',
+    subtitle: 'Vamos conversar sobre como implementar esse ecossistema no seu negócio?',
     content: []
   };
 
   return {
     title: `Proposta - ${clientName}`,
-    slides: [slide1, slide2, slide3, slide4, slide5, slide6, slide7]
+    slides: [slide1, slide2, slide3, slide4, slide5, slide6]
   };
 };

@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import {
   DndContext,
@@ -22,7 +23,7 @@ import { CATEGORIES, SERVICES } from './constants';
 import { SelectedService, ServiceItem, PresentationData, PresentationSlide } from './types';
 import { generateStaticPresentation } from './services/presentationGenerator';
 import { downloadPPT } from './services/pptGenerator';
-import { Plus, Trash2, GripVertical, Printer, ArrowLeft, DollarSign, ShieldCheck, Box, X, Calculator, CheckCircle2, FileVideo, Sparkles, Presentation, MoreHorizontal } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Printer, ArrowLeft, DollarSign, ShieldCheck, Box, X, Calculator, CheckCircle2, FileVideo, Sparkles, Presentation, MoreHorizontal, ReceiptText } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -172,7 +173,8 @@ const BudgetModal: React.FC<{
         <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 rounded-b-2xl flex justify-between items-center">
           <div>
             <p className="text-xs text-zinc-500 uppercase font-bold">Total Estimado</p>
-            <p className="text-2xl font-bold text-[#4ade80]">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+            {/* Fix: use Intl.NumberFormat instead of toLocaleString with arguments */}
+            <p className="text-2xl font-bold text-[#4ade80]">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</p>
           </div>
           <button 
             onClick={handleSubmit}
@@ -199,7 +201,6 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
   return (
     <div className="fixed inset-0 z-[100] bg-black overflow-y-auto print:static print:overflow-visible print:bg-black print-container animate-fade-in">
       
-      {/* Navigation Controls - Hidden on print */}
       <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent pointer-events-none">
         <button onClick={onClose} className="pointer-events-auto flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all hover:border-zinc-600 shadow-xl">
           <ArrowLeft className="w-4 h-4" /> Voltar ao Canvas
@@ -211,7 +212,6 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
           >
             <Presentation className="w-4 h-4" /> Exportar PPT
           </button>
-          {/* Ensure window.print() is called with no arguments as per its standard definition to avoid parameter mismatch errors */}
           <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#4ade80] text-black px-7 py-2.5 rounded-full font-bold hover:scale-105 transition-all shadow-[0_0_20px_rgba(74,222,128,0.4)]">
             <Printer className="w-4 h-4" /> Gerar PDF (Imprimir)
           </button>
@@ -222,7 +222,6 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
         {data.slides.map((slide, index) => (
           <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-20 print:p-12 print-slide overflow-hidden border-b border-zinc-900 print:border-none shadow-inner">
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#4ade80]/5 rounded-full blur-[140px] pointer-events-none opacity-60" />
-            <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none opacity-40" />
             
             <div className="absolute top-10 left-16"><BrandLogo /></div>
             
@@ -296,6 +295,63 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
                              )
                          })}
                     </div>
+                </div>
+              )}
+
+              {slide.type === 'budget' && (
+                <div className="h-full flex flex-col pt-8">
+                  <div className="flex justify-between items-end mb-10">
+                    <div>
+                      <h2 className="text-5xl font-black text-[#4ade80] mb-2 uppercase tracking-tighter italic">Proposta Comercial</h2>
+                      <p className="text-xl text-zinc-400 font-light italic">{slide.subtitle}</p>
+                    </div>
+                    <div className="bg-[#4ade80] text-black px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">
+                      Documento Oficial
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-hidden bg-zinc-900/40 border border-zinc-800 rounded-[32px] backdrop-blur-md shadow-2xl flex flex-col">
+                    <div className="grid grid-cols-12 gap-4 p-6 border-b border-zinc-800 bg-zinc-950/40 text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500">
+                      <div className="col-span-1 text-center">#</div>
+                      <div className="col-span-7">Módulo / Serviço</div>
+                      <div className="col-span-4 text-right">Investimento (BRL)</div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
+                      {slide.servicesList?.map((service, idx) => (
+                        <div key={service.uniqueId} className="grid grid-cols-12 gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors items-center border border-transparent hover:border-zinc-800">
+                          <div className="col-span-1 text-center text-zinc-600 font-mono">{String(idx + 1).padStart(2, '0')}</div>
+                          <div className="col-span-7">
+                            <p className="text-sm font-bold text-zinc-100 uppercase tracking-tight">{service.name}</p>
+                            <p className="text-[10px] text-zinc-500 font-light italic">{service.description}</p>
+                          </div>
+                          <div className="col-span-4 text-right font-mono text-lg text-white font-bold">
+                            R$ {service.price || '0,00'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-8 border-t border-zinc-800 bg-zinc-950/60 flex justify-between items-center">
+                      <div className="space-y-1">
+                        {slide.content.map((note, i) => (
+                          <p key={i} className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                             <ShieldCheck className="w-3 h-3 text-[#4ade80]" /> {note}
+                          </p>
+                        ))}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-zinc-500 uppercase font-black tracking-[0.3em] mb-1">Investimento Total</p>
+                        <p className="text-5xl font-black text-[#4ade80] tracking-tighter">
+                          {/* Fix: use Intl.NumberFormat instead of toLocaleString with arguments */}
+                          R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+                            slide.servicesList?.reduce((acc, curr) => {
+                              const val = parseFloat(curr.price?.replace(/\./g, '').replace(',', '.') || '0');
+                              return acc + (isNaN(val) ? 0 : val);
+                            }, 0) || 0
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
