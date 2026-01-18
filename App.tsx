@@ -93,7 +93,7 @@ const DroppableZone: React.FC<{
       {items.length === 0 ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 pointer-events-none">
            <Box className="w-16 h-16 mb-4 opacity-20" />
-           <p className="font-medium text-sm">Arraste os módulos para construir o ecossistema</p>
+           <p className="font-medium text-sm text-center px-4">Arraste os módulos da coluna esquerda para construir o ecossistema</p>
         </div>
       ) : (
         <SortableContext items={items.map(i => i.uniqueId)} strategy={verticalListSortingStrategy}>
@@ -201,36 +201,36 @@ const BudgetDocumentView: React.FC<{
   }, 0);
 
   return (
-    <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-8">
+    <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8 pb-20">
-        <div className="flex justify-between items-start no-print">
+        <div className="flex justify-between items-start no-print p-4 md:p-0">
             <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-800">
-                <ArrowLeft className="w-4 h-4" /> Voltar
+                <ArrowLeft className="w-4 h-4" /> Voltar ao Builder
             </button>
             <button onClick={() => window.print()} className="bg-[#74fbae] text-black px-8 py-3 rounded-full font-bold flex items-center gap-2 shadow-xl hover:scale-105 transition-all">
-                <Printer className="w-5 h-5" /> Imprimir Orçamento (PDF)
+                <Printer className="w-5 h-5" /> Imprimir Proposta (PDF)
             </button>
         </div>
 
-        <div className="bg-white text-zinc-900 p-16 rounded-sm shadow-2xl min-h-[1100px] flex flex-col font-serif print:shadow-none print:p-8">
+        <div className="bg-white text-zinc-900 p-8 md:p-16 shadow-2xl min-h-[1123px] flex flex-col print:shadow-none print:m-0 print:rounded-none">
             <div className="flex justify-between items-center border-b-2 border-zinc-900 pb-8 mb-12">
                 <Logo className="h-10 w-auto invert" />
                 <div className="text-right">
                     <h1 className="text-2xl font-black uppercase tracking-tighter">Proposta Comercial</h1>
-                    <p className="text-sm text-zinc-500">#{new Date().getFullYear()}-{(Math.random()*1000).toFixed(0)}</p>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Growth Ecosystems Builder</p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-12 mb-12 text-sm italic">
+            <div className="grid grid-cols-2 gap-12 mb-12 text-sm">
                 <div>
-                    <p className="font-bold text-xs uppercase not-italic text-zinc-400 mb-1">Cliente</p>
-                    <p className="text-lg font-bold not-italic">{client || '---'}</p>
-                    <p className="text-zinc-600">Projeto: {project || '---'}</p>
+                    <p className="font-black text-[10px] uppercase text-zinc-400 mb-2 tracking-widest">Para o Cliente</p>
+                    <p className="text-xl font-bold">{client || '---'}</p>
+                    <p className="text-zinc-500 font-medium mt-1">Projeto: {project || '---'}</p>
                 </div>
                 <div className="text-right">
-                    <p className="font-bold text-xs uppercase not-italic text-zinc-400 mb-1">Emissão</p>
-                    <p className="font-bold not-italic">{new Date().toLocaleDateString('pt-BR')}</p>
-                    <p className="text-zinc-600">Validade: 07 dias corridos</p>
+                    <p className="font-black text-[10px] uppercase text-zinc-400 mb-2 tracking-widest">Dados da Proposta</p>
+                    <p className="font-bold">Emissão: {new Date().toLocaleDateString('pt-BR')}</p>
+                    <p className="text-zinc-500">Validade: 07 dias corridos</p>
                 </div>
             </div>
 
@@ -238,18 +238,18 @@ const BudgetDocumentView: React.FC<{
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="border-b-2 border-zinc-900">
-                            <th className="py-4 font-black uppercase text-xs">Item / Ecossistema</th>
-                            <th className="py-4 font-black uppercase text-xs text-right">Investimento</th>
+                            <th className="py-4 font-black uppercase text-[10px] tracking-widest">Módulo / Serviço Selecionado</th>
+                            <th className="py-4 font-black uppercase text-[10px] tracking-widest text-right">Investimento</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {items.map((item, idx) => (
+                        {items.map((item) => (
                             <tr key={item.uniqueId} className="border-b border-zinc-100">
-                                <td className="py-6">
-                                    <p className="font-bold text-base">{item.name}</p>
-                                    <p className="text-xs text-zinc-500 italic max-w-md">{item.description}</p>
+                                <td className="py-6 pr-8">
+                                    <p className="font-bold text-base leading-tight mb-1">{item.name}</p>
+                                    <p className="text-xs text-zinc-500 italic font-medium leading-relaxed">{item.description}</p>
                                 </td>
-                                <td className="py-6 text-right font-mono font-bold">
+                                <td className="py-6 text-right font-mono font-bold whitespace-nowrap">
                                     R$ {item.price || '0,00'}
                                 </td>
                             </tr>
@@ -258,27 +258,27 @@ const BudgetDocumentView: React.FC<{
                 </table>
             </div>
 
-            <div className="mt-12 pt-8 border-t-2 border-zinc-900">
+            <div className="mt-12 pt-10 border-t-2 border-zinc-900">
                 <div className="flex justify-between items-end">
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         <div>
-                            <p className="font-black text-xs uppercase mb-2">Condições de Pagamento</p>
-                            <ul className="text-xs space-y-1 text-zinc-600">
-                                <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-zinc-900" /> 50% de entrada no aceite da proposta</li>
-                                <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-zinc-900" /> 50% na entrega da arquitetura do ecossistema</li>
-                                <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-zinc-900" /> Faturamento via NF-e (Serviços)</li>
+                            <p className="font-black text-[10px] uppercase mb-3 tracking-widest">Termos e Condições</p>
+                            <ul className="text-[11px] space-y-2 text-zinc-600 font-medium">
+                                <li className="flex items-start gap-2"><CheckCircle className="w-3 h-3 text-zinc-900 mt-0.5 shrink-0" /> 50% de entrada no aceite e 50% após 30 dias.</li>
+                                <li className="flex items-start gap-2"><CheckCircle className="w-3 h-3 text-zinc-900 mt-0.5 shrink-0" /> Faturamento via Nota Fiscal de Serviços Eletrônica (NFS-e).</li>
+                                <li className="flex items-start gap-2"><CheckCircle className="w-3 h-3 text-zinc-900 mt-0.5 shrink-0" /> Prazo de implementação estimado conforme arquitetura.</li>
                             </ul>
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="font-black text-xs uppercase text-zinc-400 mb-1">Total Geral</p>
-                        <p className="text-5xl font-black tracking-tighter">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(total)}</p>
+                        <p className="font-black text-[10px] uppercase text-zinc-400 mb-1 tracking-widest">Investimento Total</p>
+                        <p className="text-5xl font-black tracking-tighter leading-none">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(total)}</p>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-20 text-[10px] text-zinc-400 uppercase text-center tracking-[0.3em] border-t border-zinc-100 pt-8">
-                Build on Growth Ecosystems © {new Date().getFullYear()}
+            <div className="mt-16 text-[9px] text-zinc-400 uppercase text-center tracking-[0.4em] font-bold border-t border-zinc-50 pt-8">
+                Build on Growth © {new Date().getFullYear()}
             </div>
         </div>
       </div>
@@ -289,52 +289,56 @@ const BudgetDocumentView: React.FC<{
 // --- VISUALIZAÇÃO DA APRESENTAÇÃO (ESTRATÉGICA - SEM VALORES) ---
 const PresentationView: React.FC<{ data: PresentationData, clientName: string, projectName: string, onClose: () => void }> = ({ data, clientName, projectName, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in no-scrollbar">
       <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent">
-        <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all">
-          <ArrowLeft className="w-4 h-4" /> Sair
+        <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all font-bold text-xs uppercase tracking-widest">
+          <ArrowLeft className="w-4 h-4" /> Sair da Visualização
         </button>
         <div className="flex gap-4">
            <button 
             onClick={() => downloadPPT(data, clientName)}
-            className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg"
+            className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg text-xs uppercase tracking-widest"
           >
-            <Presentation className="w-4 h-4" /> Baixar PPT (Estratégico)
+            <Presentation className="w-4 h-4" /> Exportar PowerPoint
           </button>
-          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#74fbae] text-black px-7 py-2.5 rounded-full font-bold hover:scale-105 transition-all">
-            <Printer className="w-4 h-4" /> Imprimir Slides
+          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#74fbae] text-black px-8 py-2.5 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(116,251,174,0.4)]">
+            <Printer className="w-4 h-4" /> Gerar PDF (Slides)
           </button>
         </div>
       </div>
 
       <div className="mx-auto pt-24 pb-12 px-4 max-w-6xl space-y-12">
         {data.slides.map((slide, index) => (
-          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-16 print:p-12 print-slide overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl">
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#74fbae]/5 rounded-full blur-[100px] pointer-events-none" />
+          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-8 md:p-16 print-slide overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl print:shadow-none print:rounded-none print:border-none">
+            {/* Ambient Background */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#74fbae]/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-[#74fbae]/3 rounded-full blur-[80px] pointer-events-none" />
+            
             <div className="absolute top-10 left-12"><Logo className="h-8 w-auto" /></div>
             
             <div className="flex-1 flex flex-col justify-center relative z-10">
               {slide.type === 'cover' && (
                 <div className="max-w-4xl">
-                  <h1 className="text-[80px] font-black leading-[0.85] mb-8 text-white tracking-tighter uppercase italic">
+                  <p className="text-[12px] font-black tracking-[0.5em] text-[#74fbae] mb-4 uppercase">Estratégia de Ecossistema</p>
+                  <h1 className="text-[60px] md:text-[85px] font-black leading-[0.85] mb-8 text-white tracking-tighter uppercase italic">
                     Ecossistema<br/><span className="text-zinc-600">de Growth</span>
                   </h1>
-                  <p className="text-xl text-zinc-400 font-light border-l-4 border-[#74fbae] pl-6 italic">{slide.subtitle}</p>
+                  <p className="text-xl md:text-2xl text-zinc-400 font-light border-l-4 border-[#74fbae] pl-6 italic max-w-2xl">{slide.subtitle}</p>
                 </div>
               )}
 
               {slide.type === 'content' && (
                 <div className="grid grid-cols-12 gap-12 h-full items-center">
                   <div className="col-span-5 border-r border-zinc-800/50 pr-12">
-                    <h2 className="text-4xl font-black text-[#74fbae] leading-tight mb-6 uppercase italic">{slide.title}</h2>
+                    <h2 className="text-3xl md:text-5xl font-black text-[#74fbae] leading-tight mb-6 uppercase italic tracking-tighter">{slide.title}</h2>
                     <p className="text-lg text-zinc-500 font-light italic">{slide.subtitle}</p>
                   </div>
                   <div className="col-span-7">
-                    <ul className="space-y-6">
+                    <ul className="space-y-8">
                       {slide.content.map((point, i) => (
-                        <li key={i} className="flex items-start gap-4">
-                          <div className="mt-2.5 w-1.5 h-1.5 rounded-full bg-[#74fbae] shrink-0" />
-                          <p className="text-xl text-zinc-200 font-light tracking-tight">{point}</p>
+                        <li key={i} className="flex items-start gap-5">
+                          <div className="mt-3 w-1.5 h-1.5 rounded-full bg-[#74fbae] shrink-0 shadow-[0_0_10px_#74fbae]" />
+                          <p className="text-xl md:text-2xl text-zinc-200 font-light tracking-tight leading-snug">{point}</p>
                         </li>
                       ))}
                     </ul>
@@ -344,18 +348,18 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
 
               {slide.type === 'service_list' && (
                 <div className="h-full flex flex-col pt-8">
-                    <h2 className="text-4xl font-black text-white mb-8 uppercase italic">As Engrenagens do Ecossistema</h2>
+                    <h2 className="text-3xl md:text-4xl font-black text-white mb-8 uppercase italic tracking-tighter">Engrenagens do Ecossistema</h2>
                     <div className="grid grid-cols-3 gap-6">
-                         {CATEGORIES.map(cat => {
+                         {CATEGORIES.filter(cat => slide.servicesList?.some(i => i.category === cat.id)).map(cat => {
                              const items = slide.servicesList?.filter(s => s.category === cat.id);
                              if (!items || items.length === 0) return null;
                              return (
-                                 <div key={cat.id} className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-2xl">
-                                     <h3 className="font-bold text-[10px] uppercase tracking-widest text-zinc-500 mb-4 border-b border-zinc-800 pb-3">{cat.title}</h3>
-                                     <ul className="space-y-2">
+                                 <div key={cat.id} className="bg-zinc-900/40 backdrop-blur-sm border border-zinc-800 p-6 rounded-2xl">
+                                     <h3 className="font-bold text-[10px] uppercase tracking-[0.3em] text-[#74fbae] mb-4 border-b border-zinc-800 pb-3">{cat.title}</h3>
+                                     <ul className="space-y-3">
                                          {items.map(s => (
-                                             <li key={s.uniqueId} className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
-                                                 <span className="w-1 h-1 bg-[#74fbae] rounded-full" /> {s.name}
+                                             <li key={s.uniqueId} className="text-sm font-bold text-zinc-200 flex items-center gap-3">
+                                                 <span className="w-1 h-1 bg-zinc-600 rounded-full" /> {s.name}
                                              </li>
                                          ))}
                                      </ul>
@@ -368,13 +372,19 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
 
               {slide.type === 'closing' && (
                 <div className="flex flex-col items-center justify-center text-center h-full">
-                    <h2 className="text-6xl font-black text-white mb-8 tracking-tighter uppercase italic">{slide.title}</h2>
-                    <p className="text-2xl text-zinc-400 font-light mb-12 italic">{slide.subtitle}</p>
-                    <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-3xl min-w-[350px]">
-                        <p className="text-2xl text-[#74fbae] font-mono mb-1">contato@buildongrowth.com</p>
+                    <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter uppercase italic">{slide.title}</h2>
+                    <p className="text-2xl text-zinc-400 font-light mb-12 italic max-w-2xl">{slide.subtitle}</p>
+                    <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800 p-8 rounded-3xl min-w-[380px] hover:border-[#74fbae]/30 transition-all">
+                        <p className="text-2xl text-[#74fbae] font-mono mb-1 tracking-tight">contato@buildongrowth.com</p>
+                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em]">Build on Growth Ecosystems</p>
                     </div>
                 </div>
               )}
+            </div>
+            
+            {/* Slide Number */}
+            <div className="absolute bottom-10 right-12 text-[10px] font-black text-zinc-800 tracking-widest uppercase">
+              {String(index + 1).padStart(2, '0')} // {String(data.slides.length).padStart(2, '0')}
             </div>
           </div>
         ))}
@@ -434,13 +444,13 @@ export default function App() {
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex h-screen font-sans overflow-hidden bg-[#09090b] text-zinc-100">
         <aside className="w-80 flex flex-col border-r border-zinc-800 bg-[#0c0c0e] z-10 print:hidden">
-          <div className="p-8 border-b border-zinc-800">
+          <div className="p-8 border-b border-zinc-800 flex justify-center">
             <Logo className="h-10 w-auto" />
           </div>
           <div className="flex-1 overflow-y-auto p-5 space-y-8 no-scrollbar">
             {CATEGORIES.map(cat => (
               <div key={cat.id}>
-                <h3 className="text-[10px] font-black text-zinc-500 mb-4 tracking-widest uppercase opacity-50">{cat.title}</h3>
+                <h3 className="text-[10px] font-black text-zinc-500 mb-4 tracking-[0.3em] uppercase opacity-50">{cat.title}</h3>
                 {SERVICES.filter(s => s.category === cat.id).map(s => (
                   <DraggableItem key={s.id} service={s} />
                 ))}
@@ -451,14 +461,14 @@ export default function App() {
 
         <main className="flex-1 flex flex-col relative print:hidden">
           <header className="h-24 border-b border-zinc-800 bg-[#09090b]/80 backdrop-blur-xl flex items-center px-12 justify-between z-20">
-            <div className="flex gap-8">
+            <div className="flex gap-12">
               <div className="w-64">
-                <p className="text-[9px] font-bold text-[#74fbae] uppercase mb-1 tracking-widest">Cliente</p>
-                <input value={clientName} onChange={e => setClientName(e.target.value)} className="w-full bg-transparent border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-1 text-white placeholder-zinc-800" placeholder="Nome..." />
+                <p className="text-[9px] font-black text-[#74fbae] uppercase mb-1 tracking-[0.2em]">Cliente Foco</p>
+                <input value={clientName} onChange={e => setClientName(e.target.value)} className="w-full bg-transparent border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-1 text-white placeholder-zinc-800 font-bold tracking-tight" placeholder="NOME DO CLIENTE..." />
               </div>
               <div className="w-64">
-                <p className="text-[9px] font-bold text-[#74fbae] uppercase mb-1 tracking-widest">Projeto</p>
-                <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full bg-transparent border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-1 text-white placeholder-zinc-800" placeholder="Projeto..." />
+                <p className="text-[9px] font-black text-[#74fbae] uppercase mb-1 tracking-[0.2em]">Ecossistema</p>
+                <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full bg-transparent border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-1 text-white placeholder-zinc-800 font-bold tracking-tight" placeholder="NOME DO PROJETO..." />
               </div>
             </div>
             
@@ -466,21 +476,21 @@ export default function App() {
                 <button 
                     onClick={() => setIsBudgetOpen(true)} 
                     disabled={cartItems.length === 0} 
-                    className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 text-zinc-300 px-6 py-3 rounded-full font-bold text-[10px] uppercase tracking-widest hover:text-[#74fbae] hover:border-[#74fbae] transition-all disabled:opacity-20"
+                    className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 text-zinc-400 px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest hover:text-[#74fbae] hover:border-[#74fbae] transition-all disabled:opacity-20 disabled:cursor-not-allowed group"
                 >
-                    <Calculator className="w-4 h-4" /> Calculadora & Proposta
+                    <Calculator className="w-4 h-4 group-hover:scale-110 transition-transform" /> Orçamento & PDF
                 </button>
                 <button 
                     onClick={handleGeneratePresentation} 
                     disabled={cartItems.length === 0} 
-                    className="bg-[#74fbae] text-black px-8 py-3 rounded-full font-black uppercase tracking-widest text-[10px] flex items-center gap-2 hover:scale-105 transition-all disabled:opacity-20 shadow-lg"
+                    className="bg-[#74fbae] text-black px-8 py-3 rounded-full font-black uppercase tracking-widest text-[10px] flex items-center gap-2 hover:scale-105 transition-all disabled:opacity-20 disabled:cursor-not-allowed shadow-[0_0_25px_rgba(116,251,174,0.3)]"
                 >
                     <Sparkles className="w-4 h-4" /> Apresentação Estratégica
                 </button>
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-12 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-12 no-scrollbar bg-[radial-gradient(circle_at_50%_50%,#18181b_0%,#09090b_100%)]">
             <DroppableZone items={cartItems} onRemove={id => setCartItems(p => p.filter(i => i.uniqueId !== id))} />
           </div>
         </main>

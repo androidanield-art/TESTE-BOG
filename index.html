@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Service Canvas Builder</title>
     
-    <!-- Tailwind via CDN apenas para o estado de carregamento/fallback -->
+    <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,29 +49,73 @@
         animation: pulse 1.5s infinite;
       }
       @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+      /* ESTILOS DE IMPRESSÃO PREMIUM */
+      @media print {
+        @page {
+          margin: 0;
+          size: auto;
+        }
+        body {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          background-color: #09090b !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .print-slide {
+          page-break-after: always;
+          break-after: page;
+          margin: 0 !important;
+          border: none !important;
+          border-radius: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+        }
+        /* Garantir que o orçamento (branco) imprima corretamente se for o caso */
+        .bg-white {
+          background-color: white !important;
+          color: black !important;
+        }
+      }
+
+      /* Custom Scrollbar for Premium Feel */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #09090b;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #27272a;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #74fbae;
+      }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
-    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
-    "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2",
-    "clsx": "https://esm.sh/clsx@^2.1.1",
-    "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
     "vite": "https://esm.sh/vite@^7.3.1",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
+    "clsx": "https://esm.sh/clsx@^2.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "react/": "https://esm.sh/react@^19.2.3/"
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
+    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
+    "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2",
+    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1"
   }
 }
 </script>
 </head>
   <body>
     <div id="root"></div>
-    <!-- O Vite transformará este index.tsx em um arquivo .js compatível durante o build -->
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
