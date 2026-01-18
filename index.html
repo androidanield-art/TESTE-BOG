@@ -27,18 +27,12 @@
               }
             },
             animation: {
-              'fade-in': 'fadeIn 0.3s ease-out',
-              'slide-up': 'slideUp 0.4s ease-out',
+              'fade-in': 'fadeIn 0.2s ease-out',
+              'slide-up': 'slideUp 0.3s ease-out',
             },
             keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              slideUp: {
-                '0%': { transform: 'translateY(20px)', opacity: '0' },
-                '100%': { transform: 'translateY(0)', opacity: '1' },
-              }
+              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+              slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
             }
           },
         },
@@ -47,68 +41,49 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #09090b; /* Dark bg */
+        background-color: #09090b;
         color: #e4e4e7;
         margin: 0;
         padding: 0;
       }
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
-      /* Glassmorphism Utilities */
-      .glass {
-        background: rgba(24, 24, 27, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-      }
-
-      /* CSS CRÍTICO PARA IMPRESSÃO (PDF) */
       @media print {
         @page {
-            size: landscape; /* Força orientação paisagem */
-            margin: 0;
+          size: landscape;
+          margin: 0;
         }
         
         html, body {
-            height: auto !important;
-            overflow: visible !important;
-            background-color: #09090b !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
+          height: auto !important;
+          overflow: visible !important;
+          background: #09090b !important;
+          color-adjust: exact !important;
+          -webkit-print-color-adjust: exact !important;
         }
 
-        /* Oculta tudo que não for a área de impressão */
-        #root > div {
-            display: none !important; 
+        #root > div:not(.print-container) {
+          display: none !important;
         }
 
-        /* Mostra apenas o container da apresentação */
         .print-container {
-            display: block !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            z-index: 9999 !important;
-            background-color: #09090b !important;
+          display: block !important;
+          position: relative !important;
+          width: 100% !important;
+          height: auto !important;
+          background: #09090b !important;
         }
 
-        /* Força quebra de página após cada slide */
         .print-slide {
-            page-break-after: always !important;
-            break-after: always !important;
-            height: 100vh !important;
-            width: 100vw !important;
-            overflow: hidden !important;
-            display: flex !important;
-            background-color: #09090b !important;
+          display: flex !important;
+          height: 100vh !important;
+          width: 100vw !important;
+          page-break-after: always !important;
+          break-after: always !important;
+          overflow: hidden !important;
+          position: relative !important;
+          background: #09090b !important;
         }
 
         .no-print {
@@ -116,26 +91,27 @@
         }
       }
     </style>
-  <script type="importmap">
+    <script type="importmap">
 {
   "imports": {
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
     "react": "https://esm.sh/react@^19.2.3",
+    "react-dom": "https://esm.sh/react-dom@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
     "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
     "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2",
     "clsx": "https://esm.sh/clsx@^2.1.1",
     "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
-    "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "pptxgenjs": "https://esm.sh/pptxgenjs@^3.12.0",
     "react/": "https://esm.sh/react@^19.2.3/",
-    "pptxgenjs": "https://esm.sh/pptxgenjs@^3.12.0"
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
-</head>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
