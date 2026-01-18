@@ -22,17 +22,19 @@ import { SelectedService, ServiceItem, PresentationData } from './types';
 import { generateStaticPresentation } from './services/presentationGenerator';
 import { downloadPPT } from './services/pptGenerator';
 import { Logo } from './Logo';
-import { Plus, Trash2, GripVertical, Printer, ArrowLeft, Box, X, Calculator, Sparkles, Presentation, FileText, CheckCircle, Camera, Download, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Printer, ArrowLeft, Box, X, Calculator, Sparkles, Presentation, FileText, CheckCircle, Camera, Download, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 // @ts-ignore
 import html2canvas from 'html2canvas';
+import { jsPDF } from "jspdf";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(...inputs));
 }
 
 // --- UTILITÁRIOS DE EXPORTAÇÃO ---
+
 const exportToImage = async (elementId: string, fileName: string) => {
   const element = document.getElementById(elementId);
   if (!element) return;
@@ -43,7 +45,7 @@ const exportToImage = async (elementId: string, fileName: string) => {
       backgroundColor: '#09090b', // Garante fundo escuro
       useCORS: true,
       logging: false,
-      scrollY: -window.scrollY, // Corrige problemas de scroll
+      scrollY: -window.scrollY, 
       windowWidth: document.documentElement.offsetWidth,
       windowHeight: document.documentElement.offsetHeight
     });
@@ -55,6 +57,118 @@ const exportToImage = async (elementId: string, fileName: string) => {
   } catch (error) {
     console.error("Erro ao gerar imagem:", error);
     alert("Erro ao gerar imagem. Tente novamente.");
+  }
+};
+
+/**
+ * Gera um PDF multipáginas capturando elementos do DOM.
+ * @param containerId ID do container pai (para slides) ou ID do elemento único (para doc).
+ * @param fileName Nome do arquivo final.
+ * @param mode 'slides' itera sobre filhos; 'single' captura o elemento inteiro.
+ * @param orientation Orientação do papel ('l' = landscape, 'p' = portrait).
+ * @param bgColor Cor de fundo forçada para evitar transparência.
+ */
+const exportToPDF = async (
+  containerId: string, 
+  fileName: string, 
+  mode: 'slides' | 'single',
+  orientation: 'p' | 'l' = 'l',
+  bgColor: string = '#09090b'
+) => {
+  const element = document.getElementById(containerId);
+  if (!element) return;
+
+  // Feedback visual de carregamento poderia ser adicionado aqui
+  document.body.style.cursor = 'wait';
+
+  try {
+    const pdf = new jsPDF({
+      orientation: orientation,
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    if (mode === 'slides') {
+      // Para slides, pegamos cada filho direto do container
+      const slides = Array.from(element.children) as HTMLElement[];
+      
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        
+        // Captura o slide individualmente
+        const canvas = await html2canvas(slide, {
+          scale: 2,
+          backgroundColor: bgColor,
+          useCORS: true,
+          logging: false
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        
+        // Ajuste de proporção para caber na página A4 (Landscape)
+        const imgProps = pdf.getImageProperties(imgData);
+        const ratio = imgProps.width / imgProps.height;
+        let w = pageWidth;
+        let h = w / ratio;
+        
+        if (h > pageHeight) {
+          h = pageHeight;
+          w = h * ratio;
+        }
+
+        // Centralizar
+        const x = (pageWidth - w) / 2;
+        const y = (pageHeight - h) / 2;
+
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', x, y, w, h);
+      }
+    } else {
+      // Modo Single (Orçamento)
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: bgColor,
+        useCORS: true,
+        logging: false
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgProps = pdf.getImageProperties(imgData);
+      
+      // Ajuste para A4 Portrait
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+      
+      // Se for muito comprido, ajusta pela largura
+      const w = pdfW; 
+      const h = (imgProps.height * w) / imgProps.width;
+
+      // Se a altura passar de uma página, o jspdf não quebra automaticamente imagem.
+      // Para orçamentos simples de 1 página, isso funciona. Se for longo, cortaríamos.
+      // Aqui assumimos que cabe ou redimensionamos para caber numa página (fit)
+      if (h <= pdfH) {
+         pdf.addImage(imgData, 'JPEG', 0, 0, w, h);
+      } else {
+         // Se for maior que uma página, escalamos para caber (fit to page)
+         // ou cortamos. Vamos fazer 'fit to page' para garantir que saia tudo.
+         const scaleFactor = pdfH / h;
+         const finalW = w * scaleFactor;
+         const finalH = pdfH;
+         const finalX = (pdfW - finalW) / 2;
+         pdf.addImage(imgData, 'JPEG', finalX, 0, finalW, finalH);
+      }
+    }
+
+    pdf.save(`${fileName}.pdf`);
+
+  } catch (error) {
+    console.error("Erro ao gerar PDF:", error);
+    alert("Erro ao processar PDF. Tente novamente.");
+  } finally {
+    document.body.style.cursor = 'default';
   }
 };
 
@@ -226,10 +340,20 @@ const BudgetDocumentView: React.FC<{
   project: string, 
   onClose: () => void 
 }> = ({ items, client, project, onClose }) => {
+  const [isExporting, setIsExporting] = useState(false);
   const total = items.reduce((acc, item) => {
     const val = parseFloat((item.price || '0').replace(/\./g, '').replace(',', '.') || '0');
     return acc + (isNaN(val) ? 0 : val);
   }, 0);
+
+  const handleExportPDF = async () => {
+      setIsExporting(true);
+      // Wait for React to render anything if needed, then export
+      setTimeout(async () => {
+          await exportToPDF('budget-paper', `Proposta_${client}`, 'single', 'p', '#ffffff');
+          setIsExporting(false);
+      }, 100);
+  };
 
   return (
     <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8 print:p-0 print:bg-white print:static print:overflow-visible">
@@ -243,20 +367,22 @@ const BudgetDocumentView: React.FC<{
                onClick={() => exportToImage('budget-paper', `Proposta_${client}`)}
                className="flex items-center gap-2 bg-zinc-800 text-white px-5 py-2 rounded-full font-bold hover:bg-zinc-700 transition-all text-xs uppercase tracking-widest border border-zinc-700"
              >
-                <ImageIcon className="w-4 h-4" /> Salvar Imagem
+                <ImageIcon className="w-4 h-4" /> JPG
              </button>
              <button 
-               onClick={() => window.print()} 
-               className="flex items-center gap-2 bg-[#74fbae] text-black px-5 py-2 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(116,251,174,0.3)]"
+               onClick={handleExportPDF} 
+               disabled={isExporting}
+               className="flex items-center gap-2 bg-[#74fbae] text-black px-5 py-2 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(116,251,174,0.3)] disabled:opacity-50 disabled:cursor-wait"
              >
-                <Printer className="w-4 h-4" /> Imprimir / PDF
+                {isExporting ? <Loader2 className="w-4 h-4 animate-spin"/> : <Download className="w-4 h-4" />} 
+                {isExporting ? "Gerando..." : "Baixar PDF (A4)"}
              </button>
          </div>
       </div>
 
       <div className="max-w-[210mm] mx-auto pt-20 pb-20 print:p-0 print:m-0 print:w-full">
         {/* ÁREA DE IMPRESSÃO - ID PARA HTML2CANVAS */}
-        <div id="budget-paper" className="bg-white text-zinc-900 p-[15mm] shadow-2xl min-h-[297mm] flex flex-col print:shadow-none print:m-0 print:border-none print-portrait">
+        <div id="budget-paper" className="bg-white text-zinc-900 p-[15mm] shadow-2xl min-h-[297mm] flex flex-col print:shadow-none print:m-0 print:border-none print-portrait relative">
             <div className="flex justify-between items-center border-b-2 border-zinc-900 pb-8 mb-12">
                 <Logo className="h-10 w-auto text-zinc-900" />
                 <div className="text-right">
@@ -331,6 +457,16 @@ const BudgetDocumentView: React.FC<{
 }
 
 const PresentationView: React.FC<{ data: PresentationData, clientName: string, projectName: string, onClose: () => void }> = ({ data, clientName, projectName, onClose }) => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    setTimeout(async () => {
+        await exportToPDF('slides-container', `Apresentacao_${clientName}`, 'slides', 'l', '#09090b');
+        setIsExporting(false);
+    }, 100);
+  };
+
   return (
     <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in no-scrollbar print:overflow-visible print:bg-black print:static print-container">
       {/* TOOLBAR DE APRESENTAÇÃO */}
@@ -343,16 +479,16 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
             onClick={() => downloadPPT(data, clientName)}
             className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg text-xs uppercase tracking-widest"
           >
-            <Presentation className="w-4 h-4" /> Baixar .PPTX
+            <Presentation className="w-4 h-4" /> PPTX (Editável)
           </button>
+          
           <button 
-            onClick={() => exportToImage('slides-container', `Apresentacao_${clientName}`)}
-            className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg text-xs uppercase tracking-widest"
+            onClick={handleExportPDF} 
+            disabled={isExporting}
+            className="flex items-center gap-2 bg-[#74fbae] text-black px-8 py-2.5 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(116,251,174,0.4)] disabled:opacity-50 disabled:cursor-wait"
           >
-            <ImageIcon className="w-4 h-4" /> Salvar como Imagem
-          </button>
-          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#74fbae] text-black px-8 py-2.5 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(116,251,174,0.4)]">
-            <Printer className="w-4 h-4" /> PDF / Print
+            {isExporting ? <Loader2 className="w-4 h-4 animate-spin"/> : <Download className="w-4 h-4" />}
+            {isExporting ? "Gerando..." : "Baixar PDF (Visual)"}
           </button>
         </div>
       </div>
