@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   DndContext,
   useSensor,
@@ -22,7 +22,7 @@ import { SelectedService, ServiceItem, PresentationData } from './types';
 import { generateStaticPresentation } from './services/presentationGenerator';
 import { downloadPPT } from './services/pptGenerator';
 import { Logo } from './Logo';
-import { Plus, Trash2, GripVertical, Printer, ArrowLeft, ShieldCheck, Box, X, Calculator, Sparkles, Presentation, FileText, CheckCircle, Camera } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Printer, ArrowLeft, Box, X, Calculator, Sparkles, Presentation, FileText, CheckCircle, Camera, Download, Image as ImageIcon } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 // @ts-ignore
@@ -31,6 +31,34 @@ import html2canvas from 'html2canvas';
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(...inputs));
 }
+
+// --- UTILITÁRIOS DE EXPORTAÇÃO ---
+const exportToImage = async (elementId: string, fileName: string) => {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  try {
+    const canvas = await html2canvas(element, {
+      scale: 2, // Alta resolução
+      backgroundColor: '#09090b', // Garante fundo escuro
+      useCORS: true,
+      logging: false,
+      scrollY: -window.scrollY, // Corrige problemas de scroll
+      windowWidth: document.documentElement.offsetWidth,
+      windowHeight: document.documentElement.offsetHeight
+    });
+
+    const link = document.createElement('a');
+    link.download = `${fileName}.jpg`;
+    link.href = canvas.toDataURL('image/jpeg', 0.9);
+    link.click();
+  } catch (error) {
+    console.error("Erro ao gerar imagem:", error);
+    alert("Erro ao gerar imagem. Tente novamente.");
+  }
+};
+
+// --- COMPONENTES ---
 
 const SidebarItem: React.FC<{ service: ServiceItem; isOverlay?: boolean }> = ({ service, isOverlay = false }) => (
   <div className={cn(
@@ -105,6 +133,8 @@ const DroppableZone: React.FC<{
     </div>
   );
 };
+
+// --- MODAIS DE EXPORTAÇÃO E VISUALIZAÇÃO ---
 
 const BudgetModal: React.FC<{
   isOpen: boolean;
@@ -203,18 +233,30 @@ const BudgetDocumentView: React.FC<{
 
   return (
     <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8 print:p-0 print:bg-white print:static print:overflow-visible">
-      <div className="max-w-4xl mx-auto space-y-8 pb-20 print:p-0 print:m-0 print:max-w-none print:space-y-0 print:w-full">
-        <div className="flex justify-between items-start no-print p-4 md:p-0">
-            <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-800 font-bold text-xs">
-                <ArrowLeft className="w-4 h-4" /> Voltar ao Builder
-            </button>
-            <button onClick={() => window.print()} className="bg-[#74fbae] text-black px-8 py-3 rounded-full font-bold flex items-center gap-2 shadow-xl hover:scale-105 transition-all">
-                <Printer className="w-5 h-5" /> Imprimir Proposta (PDF)
-            </button>
-        </div>
+      {/* TOOLBAR SUPERIOR PARA EXPORTAÇÃO */}
+      <div className="fixed top-0 left-0 right-0 p-4 bg-zinc-900/90 backdrop-blur border-b border-zinc-800 flex justify-between items-center z-[130] no-print">
+         <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all font-bold text-xs uppercase tracking-widest">
+            <ArrowLeft className="w-4 h-4" /> Voltar
+         </button>
+         <div className="flex gap-3">
+             <button 
+               onClick={() => exportToImage('budget-paper', `Proposta_${client}`)}
+               className="flex items-center gap-2 bg-zinc-800 text-white px-5 py-2 rounded-full font-bold hover:bg-zinc-700 transition-all text-xs uppercase tracking-widest border border-zinc-700"
+             >
+                <ImageIcon className="w-4 h-4" /> Salvar Imagem
+             </button>
+             <button 
+               onClick={() => window.print()} 
+               className="flex items-center gap-2 bg-[#74fbae] text-black px-5 py-2 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(116,251,174,0.3)]"
+             >
+                <Printer className="w-4 h-4" /> Imprimir / PDF
+             </button>
+         </div>
+      </div>
 
-        {/* Proposta Comercial - Formatada como A4 Retrato */}
-        <div className="bg-white text-zinc-900 p-8 md:p-16 shadow-2xl min-h-[297mm] flex flex-col print:shadow-none print:m-0 print:border-none print-portrait">
+      <div className="max-w-[210mm] mx-auto pt-20 pb-20 print:p-0 print:m-0 print:w-full">
+        {/* ÁREA DE IMPRESSÃO - ID PARA HTML2CANVAS */}
+        <div id="budget-paper" className="bg-white text-zinc-900 p-[15mm] shadow-2xl min-h-[297mm] flex flex-col print:shadow-none print:m-0 print:border-none print-portrait">
             <div className="flex justify-between items-center border-b-2 border-zinc-900 pb-8 mb-12">
                 <Logo className="h-10 w-auto text-zinc-900" />
                 <div className="text-right">
@@ -291,26 +333,33 @@ const BudgetDocumentView: React.FC<{
 const PresentationView: React.FC<{ data: PresentationData, clientName: string, projectName: string, onClose: () => void }> = ({ data, clientName, projectName, onClose }) => {
   return (
     <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in no-scrollbar print:overflow-visible print:bg-black print:static print-container">
-      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent">
-        <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all font-bold text-xs uppercase tracking-widest">
+      {/* TOOLBAR DE APRESENTAÇÃO */}
+      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent pointer-events-none">
+        <button onClick={onClose} className="pointer-events-auto flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all font-bold text-xs uppercase tracking-widest">
           <ArrowLeft className="w-4 h-4" /> Sair
         </button>
-        <div className="flex gap-4">
+        <div className="flex gap-4 pointer-events-auto">
            <button 
             onClick={() => downloadPPT(data, clientName)}
             className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg text-xs uppercase tracking-widest"
           >
-            <Presentation className="w-4 h-4" /> PowerPoint
+            <Presentation className="w-4 h-4" /> Baixar .PPTX
+          </button>
+          <button 
+            onClick={() => exportToImage('slides-container', `Apresentacao_${clientName}`)}
+            className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg text-xs uppercase tracking-widest"
+          >
+            <ImageIcon className="w-4 h-4" /> Salvar como Imagem
           </button>
           <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#74fbae] text-black px-8 py-2.5 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(116,251,174,0.4)]">
-            <Printer className="w-4 h-4" /> Imprimir Slides (PDF)
+            <Printer className="w-4 h-4" /> PDF / Print
           </button>
         </div>
       </div>
 
-      <div className="mx-auto pt-24 pb-12 px-4 max-w-6xl space-y-12 slides-container print:pt-0 print:pb-0 print:px-0 print:space-y-0 print:max-w-none print:static">
+      <div id="slides-container" className="mx-auto pt-24 pb-12 px-4 max-w-6xl space-y-12 slides-container print:pt-0 print:pb-0 print:px-0 print:space-y-0 print:max-w-none print:static">
         {data.slides.map((slide, index) => (
-          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-8 md:p-16 print-slide print-landscape print-bg-dark overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl print:shadow-none print:rounded-none print:border-none print:aspect-auto">
+          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-8 md:p-16 print-slide print-landscape force-dark-print overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl print:shadow-none print:rounded-none print:border-none print:aspect-auto">
             {/* Ambient Background - Visível na impressão */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#74fbae]/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-[#74fbae]/3 rounded-full blur-[80px] pointer-events-none" />
@@ -441,33 +490,6 @@ export default function App() {
     setShowPresentation(true);
   };
 
-  // Função para Screenshot da Tela Inteira
-  const handleScreenshot = async () => {
-    const element = document.getElementById('main-builder-area');
-    if (!element) return;
-
-    try {
-      // Captura o canvas em alta resolução
-      const canvas = await html2canvas(element, {
-        scale: 2, // Melhora a qualidade
-        backgroundColor: '#09090b', // Garante o fundo preto
-        useCORS: true,
-        logging: false,
-        height: element.scrollHeight, // Captura a altura total, incluindo scroll
-        windowHeight: element.scrollHeight
-      });
-
-      // Cria o link de download
-      const link = document.createElement('a');
-      link.download = `Ecossistema_${clientName || 'Projeto'}.jpg`;
-      link.href = canvas.toDataURL('image/jpeg', 0.9);
-      link.click();
-    } catch (error) {
-      console.error("Erro ao gerar screenshot:", error);
-      alert("Não foi possível gerar a imagem.");
-    }
-  };
-
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex h-screen font-sans overflow-hidden bg-[#09090b] text-zinc-100">
@@ -503,7 +525,7 @@ export default function App() {
             <div className="flex items-center gap-4">
                 {/* Botão de Screenshot da Tela Inteira */}
                 <button 
-                  onClick={handleScreenshot}
+                  onClick={() => exportToImage('main-builder-area', `Canvas_${clientName}`)}
                   className="p-3 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all shadow-lg group"
                   title="Salvar imagem do Ecossistema (JPG)"
                 >

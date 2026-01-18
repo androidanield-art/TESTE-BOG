@@ -34,87 +34,64 @@
         padding: 0;
       }
 
-      /* ESTILOS DE IMPRESSÃO - PRECISÃO A4 */
+      /* ESTILOS DE IMPRESSÃO E EXPORTAÇÃO */
       @media print {
-        /* Configurações de Página Nomeadas para suporte a orientação mista */
         @page {
           margin: 0;
           size: auto; 
         }
 
-        @page portrait {
-          size: A4 portrait;
-          margin: 0;
-        }
-
-        @page landscape {
-          size: A4 landscape;
-          margin: 0;
-        }
-        
-        html, body {
-          width: 100%;
-          height: 100%;
-          margin: 0 !important;
-          padding: 0 !important;
-          background-color: white !important;
+        /* Força a impressão de cores de fundo */
+        * {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
+        }
+
+        body {
+          background-color: white !important;
         }
 
         .no-print {
           display: none !important;
         }
-
-        /* --- CONFIGURAÇÃO A4 VERTICAL (PROPOSTA) --- */
-        .print-portrait {
-          page: portrait; /* Força orientação vertical */
-          width: 210mm !important;
-          min-height: 297mm !important;
-          padding: 15mm !important;
-          margin: 0 auto !important;
-          background: white !important;
-          color: black !important;
-          position: relative !important;
-          box-sizing: border-box !important;
-          page-break-after: always;
-        }
         
-        tr {
-          page-break-inside: avoid;
-        }
-
-        /* --- CONFIGURAÇÃO A4 HORIZONTAL (SLIDES) --- */
-        .print-landscape {
-          page: landscape; /* Força orientação horizontal */
-          width: 297mm !important;
-          height: 210mm !important;
-          padding: 0 !important;
-          margin: 0 !important;
-          page-break-after: always !important;
-          page-break-inside: avoid !important;
-          position: relative !important;
-          overflow: hidden !important;
-          display: flex !important;
-          flex-direction: column !important;
+        /* Classe específica para forçar fundo preto na impressão se desejado */
+        .force-dark-print {
           background-color: #09090b !important;
           color: white !important;
-          -webkit-print-color-adjust: exact !important; 
-          print-color-adjust: exact !important;
         }
 
-        .slides-container {
-          width: 100% !important;
-          margin: 0 !important;
-          padding: 0 !important;
+        .print-portrait {
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto;
+          page-break-after: always;
         }
-        
-        /* Oculta scrollbars na impressão */
-        ::-webkit-scrollbar {
-          display: none;
+
+        .print-landscape {
+          width: 297mm;
+          height: 210mm;
+          page-break-after: always;
+          display: flex;
+          flex-direction: column;
         }
       }
 
+      /* Utilitários de Scroll */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #09090b; }
+      ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #74fbae; }
+
+      /* Animação de Carregamento */
       #root:empty {
         display: flex;
         align-items: center;
@@ -131,28 +108,23 @@
         animation: pulse 1.5s infinite;
       }
       @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: #09090b; }
-      ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
-      ::-webkit-scrollbar-thumb:hover { background: #74fbae; }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "vite": "https://esm.sh/vite@^7.3.1",
-    "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
-    "clsx": "https://esm.sh/clsx@^2.1.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
     "react": "https://esm.sh/react@^19.2.3",
     "react/": "https://esm.sh/react@^19.2.3/",
-    "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
-    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2",
-    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1",
-    "html2canvas": "https://esm.sh/html2canvas@^1.4.1"
+    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "clsx": "https://esm.sh/clsx@^2.1.1",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
+    "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
+    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1"
   }
 }
 </script>
