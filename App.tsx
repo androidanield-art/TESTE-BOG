@@ -41,18 +41,17 @@ const exportToImage = async (elementId: string, fileName: string) => {
 
   try {
     const canvas = await html2canvas(element, {
-      scale: 2, // Alta resolução
-      backgroundColor: '#09090b', // Garante fundo escuro
+      scale: 3, // Super alta resolução
+      backgroundColor: '#09090b',
       useCORS: true,
       logging: false,
       scrollY: -window.scrollY, 
-      windowWidth: document.documentElement.offsetWidth,
-      windowHeight: document.documentElement.offsetHeight
+      windowWidth: 1920, // Força largura HD para consistência de fonte
     });
 
     const link = document.createElement('a');
     link.download = `${fileName}.jpg`;
-    link.href = canvas.toDataURL('image/jpeg', 0.9);
+    link.href = canvas.toDataURL('image/jpeg', 1.0);
     link.click();
   } catch (error) {
     console.error("Erro ao gerar imagem:", error);
@@ -61,12 +60,7 @@ const exportToImage = async (elementId: string, fileName: string) => {
 };
 
 /**
- * Gera um PDF multipáginas capturando elementos do DOM.
- * @param containerId ID do container pai (para slides) ou ID do elemento único (para doc).
- * @param fileName Nome do arquivo final.
- * @param mode 'slides' itera sobre filhos; 'single' captura o elemento inteiro.
- * @param orientation Orientação do papel ('l' = landscape, 'p' = portrait).
- * @param bgColor Cor de fundo forçada para evitar transparência.
+ * Gera um PDF profissional pixel-perfect.
  */
 const exportToPDF = async (
   containerId: string, 
@@ -78,88 +72,75 @@ const exportToPDF = async (
   const element = document.getElementById(containerId);
   if (!element) return;
 
-  // Feedback visual de carregamento poderia ser adicionado aqui
   document.body.style.cursor = 'wait';
 
   try {
+    // Configura PDF A4
     const pdf = new jsPDF({
       orientation: orientation,
       unit: 'mm',
-      format: 'a4'
+      format: 'a4',
+      compress: true
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
 
     if (mode === 'slides') {
-      // Para slides, pegamos cada filho direto do container
       const slides = Array.from(element.children) as HTMLElement[];
       
       for (let i = 0; i < slides.length; i++) {
         const slide = slides[i];
         
-        // Captura o slide individualmente
+        // Captura com configurações fixas para evitar "drift" de design
         const canvas = await html2canvas(slide, {
-          scale: 2,
+          scale: 2, // Boa resolução sem pesar demais
           backgroundColor: bgColor,
           useCORS: true,
-          logging: false
+          logging: false,
+          windowWidth: 1920, // Garante layout 16:9 consistente
+          windowHeight: 1080
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
         
-        // Ajuste de proporção para caber na página A4 (Landscape)
-        const imgProps = pdf.getImageProperties(imgData);
-        const ratio = imgProps.width / imgProps.height;
-        let w = pageWidth;
-        let h = w / ratio;
-        
-        if (h > pageHeight) {
-          h = pageHeight;
-          w = h * ratio;
+        if (i > 0) pdf.addPage();
+
+        // 1. Pinta o fundo da página PDF para evitar bordas brancas
+        if (bgColor === '#09090b') {
+            pdf.setFillColor(9, 9, 11); // Zinc 950 (Igual ao bg)
+            pdf.rect(0, 0, pdfW, pdfH, 'F');
         }
 
-        // Centralizar
-        const x = (pageWidth - w) / 2;
-        const y = (pageHeight - h) / 2;
+        // 2. Calcula dimensões para "Fit Width" (Ajustar à largura)
+        // Slide é 16:9. A4 Landscape é ~1.41. O slide é mais "largo".
+        // Vamos preencher a largura e centralizar verticalmente.
+        const imgProps = pdf.getImageProperties(imgData);
+        const ratio = imgProps.width / imgProps.height;
+        
+        const renderW = pdfW;
+        const renderH = renderW / ratio;
+        
+        const x = 0;
+        const y = (pdfH - renderH) / 2; // Centraliza verticalmente
 
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', x, y, w, h);
+        pdf.addImage(imgData, 'JPEG', x, y, renderW, renderH);
       }
     } else {
-      // Modo Single (Orçamento)
+      // MODO ORÇAMENTO (Single Page A4 Portrait)
       const canvas = await html2canvas(element, {
         scale: 2,
         backgroundColor: bgColor,
         useCORS: true,
-        logging: false
+        logging: false,
+        windowWidth: 794, // Largura aproximada de A4 em px a 96dpi (210mm)
+        // windowHeight: 1123 
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const imgProps = pdf.getImageProperties(imgData);
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
       
-      // Ajuste para A4 Portrait
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = pdf.internal.pageSize.getHeight();
-      
-      // Se for muito comprido, ajusta pela largura
-      const w = pdfW; 
-      const h = (imgProps.height * w) / imgProps.width;
-
-      // Se a altura passar de uma página, o jspdf não quebra automaticamente imagem.
-      // Para orçamentos simples de 1 página, isso funciona. Se for longo, cortaríamos.
-      // Aqui assumimos que cabe ou redimensionamos para caber numa página (fit)
-      if (h <= pdfH) {
-         pdf.addImage(imgData, 'JPEG', 0, 0, w, h);
-      } else {
-         // Se for maior que uma página, escalamos para caber (fit to page)
-         // ou cortamos. Vamos fazer 'fit to page' para garantir que saia tudo.
-         const scaleFactor = pdfH / h;
-         const finalW = w * scaleFactor;
-         const finalH = pdfH;
-         const finalX = (pdfW - finalW) / 2;
-         pdf.addImage(imgData, 'JPEG', finalX, 0, finalW, finalH);
-      }
+      // No modo orçamento, queremos que preencha a página inteira exata
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
     }
 
     pdf.save(`${fileName}.pdf`);
@@ -348,7 +329,6 @@ const BudgetDocumentView: React.FC<{
 
   const handleExportPDF = async () => {
       setIsExporting(true);
-      // Wait for React to render anything if needed, then export
       setTimeout(async () => {
           await exportToPDF('budget-paper', `Proposta_${client}`, 'single', 'p', '#ffffff');
           setIsExporting(false);
@@ -356,7 +336,7 @@ const BudgetDocumentView: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8 print:p-0 print:bg-white print:static print:overflow-visible">
+    <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8 print:p-0 print:bg-white print:static print:overflow-visible flex justify-center">
       {/* TOOLBAR SUPERIOR PARA EXPORTAÇÃO */}
       <div className="fixed top-0 left-0 right-0 p-4 bg-zinc-900/90 backdrop-blur border-b border-zinc-800 flex justify-between items-center z-[130] no-print">
          <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all font-bold text-xs uppercase tracking-widest">
@@ -380,9 +360,9 @@ const BudgetDocumentView: React.FC<{
          </div>
       </div>
 
-      <div className="max-w-[210mm] mx-auto pt-20 pb-20 print:p-0 print:m-0 print:w-full">
-        {/* ÁREA DE IMPRESSÃO - ID PARA HTML2CANVAS */}
-        <div id="budget-paper" className="bg-white text-zinc-900 p-[15mm] shadow-2xl min-h-[297mm] flex flex-col print:shadow-none print:m-0 print:border-none print-portrait relative">
+      <div className="pt-20 pb-20 print:p-0 print:m-0 w-full flex justify-center overflow-x-hidden">
+        {/* ÁREA DE IMPRESSÃO - DIMENSÕES FIXAS A4 (210mm x 297mm) */}
+        <div id="budget-paper" className="bg-white text-zinc-900 p-[15mm] shadow-2xl w-[210mm] min-h-[297mm] flex flex-col print:shadow-none print:m-0 print:border-none print-portrait relative shrink-0">
             <div className="flex justify-between items-center border-b-2 border-zinc-900 pb-8 mb-12">
                 <Logo className="h-10 w-auto text-zinc-900" />
                 <div className="text-right">
@@ -488,7 +468,7 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
             className="flex items-center gap-2 bg-[#74fbae] text-black px-8 py-2.5 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(116,251,174,0.4)] disabled:opacity-50 disabled:cursor-wait"
           >
             {isExporting ? <Loader2 className="w-4 h-4 animate-spin"/> : <Download className="w-4 h-4" />}
-            {isExporting ? "Gerando..." : "Baixar PDF (Visual)"}
+            {isExporting ? "Gerando..." : "Baixar PDF (A4)"}
           </button>
         </div>
       </div>
@@ -577,7 +557,7 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
       </div>
     </div>
   );
-};
+}
 
 export default function App() {
   const [clientName, setClientName] = useState('');
