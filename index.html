@@ -36,9 +36,20 @@
 
       /* ESTILOS DE IMPRESSÃO - PRECISÃO A4 */
       @media print {
+        /* Configurações de Página Nomeadas para suporte a orientação mista */
         @page {
           margin: 0;
-          size: auto; /* Permite que o navegador ajuste a orientação baseado no conteúdo */
+          size: auto; 
+        }
+
+        @page portrait {
+          size: A4 portrait;
+          margin: 0;
+        }
+
+        @page landscape {
+          size: A4 landscape;
+          margin: 0;
         }
         
         html, body {
@@ -57,23 +68,25 @@
 
         /* --- CONFIGURAÇÃO A4 VERTICAL (PROPOSTA) --- */
         .print-portrait {
+          page: portrait; /* Força orientação vertical */
           width: 210mm !important;
           min-height: 297mm !important;
-          padding: 15mm !important; /* Margem de segurança interna */
+          padding: 15mm !important;
           margin: 0 auto !important;
           background: white !important;
           color: black !important;
           position: relative !important;
           box-sizing: border-box !important;
+          page-break-after: always;
         }
         
-        /* Quebra de página inteligente para tabelas na proposta */
         tr {
           page-break-inside: avoid;
         }
 
         /* --- CONFIGURAÇÃO A4 HORIZONTAL (SLIDES) --- */
         .print-landscape {
+          page: landscape; /* Força orientação horizontal */
           width: 297mm !important;
           height: 210mm !important;
           padding: 0 !important;
@@ -84,18 +97,21 @@
           overflow: hidden !important;
           display: flex !important;
           flex-direction: column !important;
-          /* Força o background escuro nos slides */
           background-color: #09090b !important;
           color: white !important;
           -webkit-print-color-adjust: exact !important; 
           print-color-adjust: exact !important;
         }
 
-        /* Garante que o container dos slides não tenha margem */
         .slides-container {
           width: 100% !important;
           margin: 0 !important;
           padding: 0 !important;
+        }
+        
+        /* Oculta scrollbars na impressão */
+        ::-webkit-scrollbar {
+          display: none;
         }
       }
 
