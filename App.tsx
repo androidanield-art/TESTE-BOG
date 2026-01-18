@@ -23,6 +23,7 @@ import { CATEGORIES, SERVICES } from './constants';
 import { SelectedService, ServiceItem, PresentationData, PresentationSlide } from './types';
 import { generateStaticPresentation } from './services/presentationGenerator';
 import { downloadPPT } from './services/pptGenerator';
+import { Logo } from './Logo';
 import { Plus, Trash2, GripVertical, Printer, ArrowLeft, DollarSign, ShieldCheck, Box, X, Calculator, CheckCircle2, FileVideo, Sparkles, Presentation, MoreHorizontal, ReceiptText } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -35,14 +36,14 @@ const SidebarItem: React.FC<{ service: ServiceItem; isOverlay?: boolean }> = ({ 
   <div className={cn(
     "group flex items-center justify-between p-3 mb-2 rounded-lg cursor-grab active:cursor-grabbing transition-all border",
     isOverlay 
-      ? "bg-zinc-900 border-[#4ade80] shadow-[0_0_15px_rgba(74,222,128,0.3)] scale-105 z-50" 
+      ? "bg-zinc-900 border-[#74fbae] shadow-[0_0_15px_rgba(116,251,174,0.3)] scale-105 z-50" 
       : "bg-zinc-900/50 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800"
   )}>
     <div>
       <h4 className={cn("text-sm font-semibold transition-colors", isOverlay ? "text-white" : "text-zinc-300 group-hover:text-white")}>{service.name}</h4>
       <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400">{service.description}</p>
     </div>
-    <Plus className={cn("w-4 h-4 transition-colors", isOverlay ? "text-[#4ade80]" : "text-zinc-600 group-hover:text-[#4ade80]")} />
+    <Plus className={cn("w-4 h-4 transition-colors", isOverlay ? "text-[#74fbae]" : "text-zinc-600 group-hover:text-[#74fbae]")} />
   </div>
 );
 
@@ -57,7 +58,7 @@ const SortableCanvasItem: React.FC<{
   return (
     <div ref={setNodeRef} style={style} className={cn(
       "relative flex items-center gap-3 p-4 rounded-xl border mb-3 group transition-all",
-      isDragging ? "opacity-30 border-[#4ade80] bg-zinc-900" : "bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:shadow-lg"
+      isDragging ? "opacity-30 border-[#74fbae] bg-zinc-900" : "bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:shadow-lg"
     )}>
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-zinc-600 hover:text-white transition-colors">
         <GripVertical className="w-5 h-5" />
@@ -89,7 +90,7 @@ const DroppableZone: React.FC<{
   return (
     <div ref={setNodeRef} className={cn(
       "max-w-3xl mx-auto min-h-[600px] border-2 border-dashed rounded-3xl p-8 transition-all duration-300 relative",
-      isOver ? "bg-zinc-900/30 border-[#4ade80] shadow-[inset_0_0_20px_rgba(74,222,128,0.05)]" : "border-zinc-800"
+      isOver ? "bg-zinc-900/30 border-[#74fbae] shadow-[inset_0_0_20px_rgba(116,251,174,0.05)]" : "border-zinc-800"
     )}>
       {items.length === 0 ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 pointer-events-none">
@@ -128,7 +129,8 @@ const BudgetModal: React.FC<{
     onClose();
   };
 
-  const total = Object.values(prices).reduce((acc: number, curr: string) => {
+  // Fixed total calculation: explicitly casting Object.values to string[] and typing reduce return to ensure number type
+  const total = (Object.values(prices) as string[]).reduce((acc: number, curr: string): number => {
     const val = parseFloat(curr.replace(/\./g, '').replace(',', '.') || '0');
     return acc + (isNaN(val) ? 0 : val);
   }, 0);
@@ -139,7 +141,7 @@ const BudgetModal: React.FC<{
         <div className="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/50 rounded-t-2xl">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-[#4ade80]" />
+              <Calculator className="w-5 h-5 text-[#74fbae]" />
               Calculadora de Investimento
             </h2>
             <p className="text-xs text-zinc-400 mt-1">Valores serão refletidos no slide de proposta comercial.</p>
@@ -161,7 +163,7 @@ const BudgetModal: React.FC<{
                 <input 
                   type="text"
                   placeholder="0,00"
-                  className="bg-zinc-900 border border-zinc-700 rounded-md py-2 pl-9 pr-3 text-right text-white focus:outline-none focus:border-[#4ade80] w-32 font-mono"
+                  className="bg-zinc-900 border border-zinc-700 rounded-md py-2 pl-9 pr-3 text-right text-white focus:outline-none focus:border-[#74fbae] w-32 font-mono"
                   value={prices[item.uniqueId] || item.price || ''}
                   onChange={(e) => handlePriceChange(item.uniqueId, e.target.value)}
                 />
@@ -173,12 +175,11 @@ const BudgetModal: React.FC<{
         <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 rounded-b-2xl flex justify-between items-center">
           <div>
             <p className="text-xs text-zinc-500 uppercase font-bold">Total Estimado</p>
-            {/* Fix: use Intl.NumberFormat instead of toLocaleString with arguments */}
-            <p className="text-2xl font-bold text-[#4ade80]">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</p>
+            <p className="text-2xl font-bold text-[#74fbae]">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</p>
           </div>
           <button 
             onClick={handleSubmit}
-            className="bg-zinc-100 text-black px-8 py-3 rounded-full font-bold hover:bg-[#4ade80] transition-all hover:scale-105 flex items-center gap-2"
+            className="bg-zinc-100 text-black px-8 py-3 rounded-full font-bold hover:bg-[#74fbae] transition-all hover:scale-105 flex items-center gap-2"
           >
             <CheckCircle2 className="w-5 h-5" />
             Salvar Orçamento
@@ -190,14 +191,6 @@ const BudgetModal: React.FC<{
 };
 
 const PresentationView: React.FC<{ data: PresentationData, clientName: string, projectName: string, onClose: () => void }> = ({ data, clientName, projectName, onClose }) => {
-  const BrandLogo = () => (
-    <div className="flex items-center text-xl tracking-tight select-none z-10">
-      <span className="font-normal text-white">Build</span>
-      <span className="font-bold text-white ml-1">on</span>
-      <span className="font-bold text-[#4ade80] ml-1 bg-white/10 px-2 py-0.5 rounded border border-white/5">Growth</span>
-    </div>
-  );
-
   return (
     <div className="fixed inset-0 z-[100] bg-black overflow-y-auto print:static print:overflow-visible print:bg-black print-container animate-fade-in">
       
@@ -212,7 +205,7 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
           >
             <Presentation className="w-4 h-4" /> Exportar PPT
           </button>
-          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#4ade80] text-black px-7 py-2.5 rounded-full font-bold hover:scale-105 transition-all shadow-[0_0_20px_rgba(74,222,128,0.4)]">
+          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#74fbae] text-black px-7 py-2.5 rounded-full font-bold hover:scale-105 transition-all shadow-[0_0_20px_rgba(116,251,174,0.4)]">
             <Printer className="w-4 h-4" /> Gerar PDF (Imprimir)
           </button>
         </div>
@@ -221,20 +214,22 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
       <div className="mx-auto print:w-full print:m-0">
         {data.slides.map((slide, index) => (
           <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-20 print:p-12 print-slide overflow-hidden border-b border-zinc-900 print:border-none shadow-inner">
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#4ade80]/5 rounded-full blur-[140px] pointer-events-none opacity-60" />
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#74fbae]/5 rounded-full blur-[140px] pointer-events-none opacity-60" />
             
-            <div className="absolute top-10 left-16"><BrandLogo /></div>
+            <div className="absolute top-10 left-16">
+               <Logo className="h-10 w-auto" />
+            </div>
             
             <div className="flex-1 flex flex-col justify-center relative z-10 px-12">
               {slide.type === 'cover' && (
                 <div className="max-w-4xl">
-                  <div className="inline-block px-4 py-1.5 bg-zinc-900/60 border border-zinc-800 rounded-full text-[#4ade80] text-[11px] font-bold uppercase tracking-[0.2em] mb-8">
+                  <div className="inline-block px-4 py-1.5 bg-zinc-900/60 border border-zinc-800 rounded-full text-[#74fbae] text-[11px] font-bold uppercase tracking-[0.2em] mb-8">
                     Proposta Estratégica
                   </div>
                   <h1 className="text-[100px] font-black leading-[0.85] mb-10 text-white tracking-tighter uppercase italic">
                     Ecossistema<br/><span className="text-zinc-600">de Growth</span>
                   </h1>
-                  <p className="text-2xl text-zinc-400 font-light max-w-2xl border-l-4 border-[#4ade80] pl-8 leading-relaxed italic">
+                  <p className="text-2xl text-zinc-400 font-light max-w-2xl border-l-4 border-[#74fbae] pl-8 leading-relaxed italic">
                     {slide.subtitle}
                   </p>
                 </div>
@@ -243,14 +238,14 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
               {slide.type === 'content' && (
                 <div className="grid grid-cols-12 gap-20 h-full items-center">
                   <div className="col-span-5 border-r border-zinc-800/50 pr-16 flex flex-col justify-center min-h-[400px]">
-                    <h2 className="text-5xl font-black text-[#4ade80] leading-[1] mb-8 uppercase break-words tracking-tighter">{slide.title}</h2>
+                    <h2 className="text-5xl font-black text-[#74fbae] leading-[1] mb-8 uppercase break-words tracking-tighter">{slide.title}</h2>
                     <p className="text-xl text-zinc-500 leading-relaxed font-light italic">{slide.subtitle}</p>
                   </div>
                   <div className="col-span-7 flex flex-col justify-center">
                     <ul className="space-y-8">
                       {slide.content.map((point, i) => (
                         <li key={i} className="flex items-start gap-6 group">
-                          <div className="mt-3.5 w-2 h-2 rounded-full bg-[#4ade80] shadow-[0_0_10px_rgba(74,222,128,0.5)] shrink-0" />
+                          <div className="mt-3.5 w-2 h-2 rounded-full bg-[#74fbae] shadow-[0_0_10px_rgba(116,251,174,0.5)] shrink-0" />
                           <p className="text-3xl text-zinc-200 font-extralight leading-tight group-hover:text-white transition-colors tracking-tight">
                             {point}
                           </p>
@@ -273,7 +268,7 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
                              const items = slide.servicesList?.filter(s => s.category === cat.id);
                              if (!items || items.length === 0) return null;
                              return (
-                                 <div key={cat.id} className="bg-zinc-900/40 border border-zinc-800 p-8 rounded-[32px] flex flex-col gap-6 backdrop-blur-sm transition-all hover:border-[#4ade80]/30 shadow-2xl">
+                                 <div key={cat.id} className="bg-zinc-900/40 border border-zinc-800 p-8 rounded-[32px] flex flex-col gap-6 backdrop-blur-sm transition-all hover:border-[#74fbae]/30 shadow-2xl">
                                      <div className="flex items-center gap-4 mb-2 border-b border-zinc-800 pb-5">
                                         <div className={cn("p-2 rounded-xl bg-zinc-950 border border-zinc-800 shadow-lg", 
                                             cat.id === 'growth' ? 'text-emerald-400' : 
@@ -286,7 +281,7 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
                                      <ul className="space-y-3.5">
                                          {items.map(s => (
                                              <li key={s.uniqueId} className="flex items-start gap-3 text-zinc-300">
-                                                 <span className="mt-2 w-1.5 h-1.5 bg-zinc-700 rounded-full shrink-0 group-hover:bg-[#4ade80]" />
+                                                 <span className="mt-2 w-1.5 h-1.5 bg-zinc-700 rounded-full shrink-0 group-hover:bg-[#74fbae]" />
                                                  <span className="text-base font-semibold leading-snug group-hover:text-white">{s.name}</span>
                                              </li>
                                          ))}
@@ -302,10 +297,10 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
                 <div className="h-full flex flex-col pt-8">
                   <div className="flex justify-between items-end mb-10">
                     <div>
-                      <h2 className="text-5xl font-black text-[#4ade80] mb-2 uppercase tracking-tighter italic">Proposta Comercial</h2>
+                      <h2 className="text-5xl font-black text-[#74fbae] mb-2 uppercase tracking-tighter italic">Proposta Comercial</h2>
                       <p className="text-xl text-zinc-400 font-light italic">{slide.subtitle}</p>
                     </div>
-                    <div className="bg-[#4ade80] text-black px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">
+                    <div className="bg-[#74fbae] text-black px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">
                       Documento Oficial
                     </div>
                   </div>
@@ -334,19 +329,19 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
                       <div className="space-y-1">
                         {slide.content.map((note, i) => (
                           <p key={i} className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                             <ShieldCheck className="w-3 h-3 text-[#4ade80]" /> {note}
+                             <ShieldCheck className="w-3 h-3 text-[#74fbae]" /> {note}
                           </p>
                         ))}
                       </div>
                       <div className="text-right">
                         <p className="text-[10px] text-zinc-500 uppercase font-black tracking-[0.3em] mb-1">Investimento Total</p>
-                        <p className="text-5xl font-black text-[#4ade80] tracking-tighter">
-                          {/* Fix: use Intl.NumberFormat instead of toLocaleString with arguments */}
+                        <p className="text-5xl font-black text-[#74fbae] tracking-tighter">
                           R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
-                            slide.servicesList?.reduce((acc, curr) => {
-                              const val = parseFloat(curr.price?.replace(/\./g, '').replace(',', '.') || '0');
+                            (slide.servicesList || []).reduce((acc: number, curr: SelectedService): number => {
+                              // Fixed price parsing: handle undefined price safely
+                              const val = parseFloat((curr.price || '0').replace(/\./g, '').replace(',', '.') || '0');
                               return acc + (isNaN(val) ? 0 : val);
-                            }, 0) || 0
+                            }, 0)
                           )}
                         </p>
                       </div>
@@ -365,7 +360,7 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
                     </p>
                     <div className="text-left bg-zinc-900/60 border border-zinc-800 p-10 rounded-[40px] min-w-[450px] shadow-2xl backdrop-blur-md">
                         <p className="text-xs text-zinc-500 uppercase tracking-[0.3em] mb-5 font-bold">Contato Estratégico</p>
-                        <p className="text-3xl text-[#4ade80] font-mono mb-2 tracking-tighter">contato@buildongrowth.com</p>
+                        <p className="text-3xl text-[#74fbae] font-mono mb-2 tracking-tighter">contato@buildongrowth.com</p>
                         <p className="text-white text-xl font-medium">Build on Growth Ecosystems</p>
                     </div>
                 </div>
@@ -374,7 +369,7 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
             
             <div className="absolute bottom-10 left-16 right-16 flex justify-between text-zinc-700 text-[11px] uppercase tracking-[0.3em] font-bold border-t border-zinc-900/50 pt-8">
               <span className="text-zinc-500">{projectName} <span className="mx-2 text-zinc-800">|</span> {clientName}</span>
-              <span className="text-[#4ade80] bg-[#4ade80]/5 px-3 py-1 rounded-full border border-[#4ade80]/10">Slide {index + 1}</span>
+              <span className="text-[#74fbae] bg-[#74fbae]/5 px-3 py-1 rounded-full border border-[#74fbae]/10">Slide {index + 1}</span>
             </div>
           </div>
         ))}
@@ -443,9 +438,9 @@ export default function App() {
       <div className="flex h-screen font-sans overflow-hidden bg-[#09090b] text-zinc-100">
         <aside className="w-80 flex flex-col border-r border-zinc-800 bg-[#0c0c0e] z-10 print:hidden">
           <div className="p-8 border-b border-zinc-800">
-            <h1 className="text-2xl font-black italic tracking-tighter text-white">BUILD<span className="text-[#4ade80]">ON</span></h1>
-            <div className="flex items-center gap-2 mt-2">
-                <div className="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse"></div>
+            <Logo className="h-12 w-auto" />
+            <div className="flex items-center gap-2 mt-4">
+                <div className="w-2 h-2 rounded-full bg-[#74fbae] animate-pulse"></div>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Ecosystem Builder</p>
             </div>
           </div>
@@ -467,12 +462,12 @@ export default function App() {
           <header className="h-28 border-b border-zinc-800 bg-[#09090b]/90 backdrop-blur-xl flex items-center px-12 justify-between z-20">
             <div className="flex gap-10">
               <div className="w-72">
-                <p className="text-[10px] font-bold text-[#4ade80] uppercase mb-2 tracking-[0.2em]">Cliente</p>
-                <input value={clientName} onChange={e => setClientName(e.target.value)} className="w-full bg-transparent text-xl font-medium border-b border-zinc-800 focus:border-[#4ade80] outline-none pb-2 text-white placeholder-zinc-800 transition-all" placeholder="Nome da empresa..." />
+                <p className="text-[10px] font-bold text-[#74fbae] uppercase mb-2 tracking-[0.2em]">Cliente</p>
+                <input value={clientName} onChange={e => setClientName(e.target.value)} className="w-full bg-transparent text-xl font-medium border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-2 text-white placeholder-zinc-800 transition-all" placeholder="Nome da empresa..." />
               </div>
               <div className="w-72">
-                <p className="text-[10px] font-bold text-[#4ade80] uppercase mb-2 tracking-[0.2em]">Projeto</p>
-                <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full bg-transparent text-xl font-medium border-b border-zinc-800 focus:border-[#4ade80] outline-none pb-2 text-white placeholder-zinc-800 transition-all" placeholder="Nome do projeto..." />
+                <p className="text-[10px] font-bold text-[#74fbae] uppercase mb-2 tracking-[0.2em]">Projeto</p>
+                <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full bg-transparent text-xl font-medium border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-2 text-white placeholder-zinc-800 transition-all" placeholder="Nome do projeto..." />
               </div>
             </div>
             
@@ -481,7 +476,7 @@ export default function App() {
                     <Calculator className="w-5 h-5" />
                     <span className="text-sm font-bold uppercase tracking-wider">Orçamento</span>
                 </button>
-                <button onClick={handleGeneratePresentation} disabled={cartItems.length === 0} className="group relative bg-[#4ade80] text-black px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-[#3ecf70] transition-all hover:scale-105 shadow-[0_0_30px_rgba(74,222,128,0.2)] disabled:opacity-20">
+                <button onClick={handleGeneratePresentation} disabled={cartItems.length === 0} className="group relative bg-[#74fbae] text-black px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-[#3ecf70] transition-all hover:scale-105 shadow-[0_0_30px_rgba(116,251,174,0.2)] disabled:opacity-20">
                     <Sparkles className="w-5 h-5" />
                     Gerar Ecossistema
                 </button>
@@ -503,6 +498,6 @@ export default function App() {
       {showPresentation && presentationData && (
         <PresentationView data={presentationData} clientName={clientName} projectName={projectName} onClose={() => setShowPresentation(false)} />
       )}
-    </DndContext>
+    </div>
   );
 }

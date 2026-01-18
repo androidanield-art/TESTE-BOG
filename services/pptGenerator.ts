@@ -1,5 +1,4 @@
 
-
 import PptxGenJS from "pptxgenjs";
 import { PresentationData, SelectedService } from "../types";
 import { CATEGORIES } from "../constants";
@@ -11,7 +10,7 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
   
   const BG_COLOR = "09090b";
   const TEXT_COLOR = "FFFFFF";
-  const ACCENT_COLOR = "4ade80";
+  const ACCENT_COLOR = "74fbae";
   const SUBTEXT_COLOR = "a1a1aa";
   const BORDER_COLOR = "27272a";
   const CARD_BG = "18181b";
@@ -94,7 +93,6 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
       s.addText("PROPOSTA COMERCIAL", { x: 0.5, y: 1.0, fontSize: 28, color: ACCENT_COLOR, bold: true, fontFace: "Arial Black", italic: true });
       s.addText("DETALHAMENTO DE INVESTIMENTO", { x: 0.5, y: 1.4, fontSize: 12, color: SUBTEXT_COLOR, italic: true });
 
-      // Fix: Use object-based fill and ensure all cells have consistent option properties for TypeScript compatibility
       const tableData: any[][] = [
         [
           { text: "SERVIÇO", options: { bold: true, color: ACCENT_COLOR, fill: { color: CARD_BG }, fontSize: 10, align: "left" } },
@@ -109,12 +107,11 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
         ]);
       });
 
-      // Fix: Use Intl.NumberFormat instead of toLocaleString with arguments
       const totalValue = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
-        slide.servicesList?.reduce((acc, curr) => {
+        (slide.servicesList || []).reduce<number>((acc, curr) => {
           const val = parseFloat(curr.price?.replace(/\./g, '').replace(',', '.') || '0');
           return acc + (isNaN(val) ? 0 : val);
-        }, 0) || 0
+        }, 0)
       );
 
       tableData.push([

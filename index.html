@@ -4,27 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Service Canvas Builder</title>
+    
+    <!-- Tailwind via CDN para prototipagem rápida -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="index.css">
+
     <script>
-      tailwind.config = {
+      window.tailwind.config = {
         theme: {
           extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
             colors: {
-              zinc: {
-                850: '#1f2937',
-                900: '#18181b',
-                950: '#09090b',
-              },
-              brand: {
-                green: '#4ade80',
-                dark: '#050505'
-              }
+              zinc: { 850: '#1f2937', 900: '#18181b', 950: '#09090b' },
+              brand: { green: '#74fbae', dark: '#050505' }
             },
             animation: {
               'fade-in': 'fadeIn 0.2s ease-out',
@@ -46,78 +43,51 @@
         margin: 0;
         padding: 0;
       }
+      #root:empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: #09090b;
+        color: #74fbae;
+        font-size: 14px;
+        letter-spacing: 0.2em;
+        font-weight: 800;
+      }
+      #root:empty::after {
+        content: "INICIALIZANDO ECOSSISTEMA...";
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
       .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
       @media print {
-        @page {
-          size: landscape;
-          margin: 0;
-        }
-        
-        html, body {
-          height: auto !important;
-          overflow: visible !important;
-          background: #09090b !important;
-          color-adjust: exact !important;
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-
-        /* Hide everything except the presentation container */
-        #root > div:not(.print-container) {
-          display: none !important;
-        }
-
-        .print-container {
-          display: block !important;
-          position: relative !important;
-          width: 100% !important;
-          height: auto !important;
-          background: #09090b !important;
-        }
-
-        .print-slide {
-          display: flex !important;
-          height: 100vh !important;
-          width: 100vw !important;
-          page-break-after: always !important;
-          break-after: always !important;
-          overflow: hidden !important;
-          position: relative !important;
-          background: #09090b !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-
-        .no-print {
-          display: none !important;
-        }
+        @page { size: landscape; margin: 0; }
+        .no-print { display: none !important; }
+        .print-slide { height: 100vh; width: 100vw; page-break-after: always; background: #09090b !important; }
       }
     </style>
-    <script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
+    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1",
     "react": "https://esm.sh/react@^19.2.3",
-    "react-dom": "https://esm.sh/react-dom@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
     "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
     "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2",
     "clsx": "https://esm.sh/clsx@^2.1.1",
     "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
-    "pptxgenjs": "https://esm.sh/pptxgenjs@^3.12.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
     "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
-  </head>
+</head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="index.tsx"></script>
   </body>
 </html>

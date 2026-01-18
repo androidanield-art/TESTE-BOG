@@ -1,0 +1,29 @@
+/* Estilos base para o ecossistema */
+:root {
+  --brand-green: #74fbae;
+  --bg-dark: #09090b;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-dark);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ajustes para impressão de slides */
+@media print {
+  body {
+    background: #09090b !important;
+  }
+}
