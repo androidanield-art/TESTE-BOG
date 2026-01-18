@@ -33,6 +33,61 @@
         margin: 0;
         padding: 0;
       }
+
+      /* ESTILOS DE IMPRESSÃO - PRECISÃO MILIMÉTRICA */
+      @media print {
+        @page {
+          size: landscape;
+          margin: 0;
+        }
+        
+        html, body {
+          width: 100%;
+          height: 100%;
+          margin: 0 !important;
+          padding: 0 !important;
+          background-color: #09090b !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        .no-print {
+          display: none !important;
+        }
+
+        /* Cada slide deve ser um bloco isolado que ocupa a tela toda */
+        .print-slide {
+          display: flex !important;
+          flex-direction: column !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          page-break-after: always !important;
+          break-after: page !important;
+          margin: 0 !important;
+          padding: 4rem !important; /* Padding fixo para conteúdo interno */
+          border: none !important;
+          border-radius: 0 !important;
+          position: relative !important;
+          overflow: hidden !important;
+          box-sizing: border-box !important;
+          background-color: #09090b !important;
+        }
+
+        /* Ajuste para o container dos slides para não ter scroll ou margem */
+        .slides-container {
+          padding: 0 !important;
+          margin: 0 !important;
+          max-width: none !important;
+          width: 100% !important;
+        }
+
+        /* Garantir que gradientes apareçam na impressão */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      }
+
       #root:empty {
         display: flex;
         align-items: center;
@@ -50,50 +105,10 @@
       }
       @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-      /* ESTILOS DE IMPRESSÃO PREMIUM */
-      @media print {
-        @page {
-          margin: 0;
-          size: auto;
-        }
-        body {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          background-color: #09090b !important;
-        }
-        .no-print {
-          display: none !important;
-        }
-        .print-slide {
-          page-break-after: always;
-          break-after: page;
-          margin: 0 !important;
-          border: none !important;
-          border-radius: 0 !important;
-          width: 100vw !important;
-          height: 100vh !important;
-        }
-        /* Garantir que o orçamento (branco) imprima corretamente se for o caso */
-        .bg-white {
-          background-color: white !important;
-          color: black !important;
-        }
-      }
-
-      /* Custom Scrollbar for Premium Feel */
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #09090b;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #27272a;
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #74fbae;
-      }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #09090b; }
+      ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #74fbae; }
     </style>
   <script type="importmap">
 {

@@ -188,7 +188,6 @@ const BudgetModal: React.FC<{
   );
 };
 
-// --- VISUALIZAÇÃO DO ORÇAMENTO (DOCUMENTO COMERCIAL) ---
 const BudgetDocumentView: React.FC<{ 
   items: SelectedService[], 
   client: string, 
@@ -201,10 +200,10 @@ const BudgetDocumentView: React.FC<{
   }, 0);
 
   return (
-    <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-8 pb-20">
+    <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8 print:p-0 print:bg-white">
+      <div className="max-w-4xl mx-auto space-y-8 pb-20 print:p-0 print:m-0 print:max-w-none print:space-y-0">
         <div className="flex justify-between items-start no-print p-4 md:p-0">
-            <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-800">
+            <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-800 font-bold text-xs">
                 <ArrowLeft className="w-4 h-4" /> Voltar ao Builder
             </button>
             <button onClick={() => window.print()} className="bg-[#74fbae] text-black px-8 py-3 rounded-full font-bold flex items-center gap-2 shadow-xl hover:scale-105 transition-all">
@@ -212,9 +211,9 @@ const BudgetDocumentView: React.FC<{
             </button>
         </div>
 
-        <div className="bg-white text-zinc-900 p-8 md:p-16 shadow-2xl min-h-[1123px] flex flex-col print:shadow-none print:m-0 print:rounded-none">
+        <div className="bg-white text-zinc-900 p-8 md:p-16 shadow-2xl min-h-[1123px] flex flex-col print:shadow-none print:m-0 print:rounded-none print:w-full print:border-none">
             <div className="flex justify-between items-center border-b-2 border-zinc-900 pb-8 mb-12">
-                <Logo className="h-10 w-auto invert" />
+                <Logo className="h-10 w-auto text-zinc-900" />
                 <div className="text-right">
                     <h1 className="text-2xl font-black uppercase tracking-tighter">Proposta Comercial</h1>
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Growth Ecosystems Builder</p>
@@ -286,35 +285,34 @@ const BudgetDocumentView: React.FC<{
   );
 }
 
-// --- VISUALIZAÇÃO DA APRESENTAÇÃO (ESTRATÉGICA - SEM VALORES) ---
 const PresentationView: React.FC<{ data: PresentationData, clientName: string, projectName: string, onClose: () => void }> = ({ data, clientName, projectName, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in no-scrollbar">
+    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in no-scrollbar print:overflow-visible print:bg-black">
       <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent">
         <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all font-bold text-xs uppercase tracking-widest">
-          <ArrowLeft className="w-4 h-4" /> Sair da Visualização
+          <ArrowLeft className="w-4 h-4" /> Sair
         </button>
         <div className="flex gap-4">
            <button 
             onClick={() => downloadPPT(data, clientName)}
             className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg text-xs uppercase tracking-widest"
           >
-            <Presentation className="w-4 h-4" /> Exportar PowerPoint
+            <Presentation className="w-4 h-4" /> PowerPoint
           </button>
           <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#74fbae] text-black px-8 py-2.5 rounded-full font-bold hover:scale-105 transition-all text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(116,251,174,0.4)]">
-            <Printer className="w-4 h-4" /> Gerar PDF (Slides)
+            <Printer className="w-4 h-4" /> Imprimir Slides (PDF)
           </button>
         </div>
       </div>
 
-      <div className="mx-auto pt-24 pb-12 px-4 max-w-6xl space-y-12">
+      <div className="mx-auto pt-24 pb-12 px-4 max-w-6xl space-y-12 slides-container print:pt-0 print:pb-0 print:px-0 print:space-y-0 print:max-w-none">
         {data.slides.map((slide, index) => (
-          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-8 md:p-16 print-slide overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl print:shadow-none print:rounded-none print:border-none">
-            {/* Ambient Background */}
+          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-8 md:p-16 print-slide overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl print:shadow-none print:rounded-none print:border-none print:aspect-auto">
+            {/* Ambient Background - Visível na impressão */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#74fbae]/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-[#74fbae]/3 rounded-full blur-[80px] pointer-events-none" />
             
-            <div className="absolute top-10 left-12"><Logo className="h-8 w-auto" /></div>
+            <div className="absolute top-10 left-12"><Logo className="h-8 w-auto text-white" /></div>
             
             <div className="flex-1 flex flex-col justify-center relative z-10">
               {slide.type === 'cover' && (
@@ -383,7 +381,7 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
             </div>
             
             {/* Slide Number */}
-            <div className="absolute bottom-10 right-12 text-[10px] font-black text-zinc-800 tracking-widest uppercase">
+            <div className="absolute bottom-10 right-12 text-[10px] font-black text-zinc-800 tracking-widest uppercase no-print">
               {String(index + 1).padStart(2, '0')} // {String(data.slides.length).padStart(2, '0')}
             </div>
           </div>
@@ -445,7 +443,7 @@ export default function App() {
       <div className="flex h-screen font-sans overflow-hidden bg-[#09090b] text-zinc-100">
         <aside className="w-80 flex flex-col border-r border-zinc-800 bg-[#0c0c0e] z-10 print:hidden">
           <div className="p-8 border-b border-zinc-800 flex justify-center">
-            <Logo className="h-10 w-auto" />
+            <Logo className="h-10 w-auto text-white" />
           </div>
           <div className="flex-1 overflow-y-auto p-5 space-y-8 no-scrollbar">
             {CATEGORIES.map(cat => (
