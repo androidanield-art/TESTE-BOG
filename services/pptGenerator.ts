@@ -1,3 +1,4 @@
+
 import PptxGenJS from "pptxgenjs";
 import { PresentationData } from "../types";
 import { CATEGORIES } from "../constants";
@@ -33,39 +34,37 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
     });
 
     if (slide.type === 'cover') {
-      // Background Accent Blur (Approximation)
       s.addShape(pres.ShapeType.ellipse, { x: 7.0, y: -1.0, w: 4.0, h: 4.0, fill: { color: ACCENT_COLOR, transparency: 90 } });
       
       s.addText("ESTRATÉGIA DE CRESCIMENTO", { x: 0.5, y: 2.0, fontSize: 12, color: ACCENT_COLOR, bold: true, charSpacing: 5, fontFace: "Inter" });
       s.addText("ECOSSISTEMA", { 
-        x: 0.4, y: 2.4, w: 9.0, fontSize: 72, color: TEXT_COLOR, bold: true, fontFace: "Impact", italic: true 
+        x: 0.4, y: 2.4, w: 9.0, fontSize: 64, color: TEXT_COLOR, bold: true, fontFace: "Impact", italic: true 
       });
       s.addText("DE GROWTH", { 
-        x: 0.4, y: 3.4, w: 9.0, fontSize: 72, color: SUBTEXT_COLOR, bold: true, fontFace: "Impact", italic: true 
+        x: 0.4, y: 3.4, w: 9.0, fontSize: 64, color: SUBTEXT_COLOR, bold: true, fontFace: "Impact", italic: true 
       });
       
       if (slide.subtitle) {
         s.addShape(pres.ShapeType.line, { x: 0.5, y: 4.8, w: 0, h: 0.8, line: { color: ACCENT_COLOR, width: 3 } });
-        s.addText(slide.subtitle, { x: 0.7, y: 4.8, w: 6.0, fontSize: 18, color: SUBTEXT_COLOR, italic: true, fontFace: "Inter" });
+        s.addText(slide.subtitle, { x: 0.7, y: 4.8, w: 6.5, fontSize: 18, color: SUBTEXT_COLOR, italic: true, fontFace: "Inter" });
       }
     } 
     
     else if (slide.type === 'content') {
       s.addText(slide.title, { 
-        x: 0.5, y: 1.5, w: 3.5, fontSize: 32, color: ACCENT_COLOR, bold: true, fontFace: "Impact", italic: true, lineSpacing: 28 
+        x: 0.5, y: 1.5, w: 3.8, fontSize: 32, color: ACCENT_COLOR, bold: true, fontFace: "Impact", italic: true, lineSpacing: 28 
       });
       if (slide.subtitle) {
-        s.addText(slide.subtitle, { x: 0.5, y: 3.2, w: 3.5, fontSize: 14, color: SUBTEXT_COLOR, italic: true, fontFace: "Inter" });
+        s.addText(slide.subtitle, { x: 0.5, y: 3.2, w: 3.8, fontSize: 14, color: SUBTEXT_COLOR, italic: true, fontFace: "Inter" });
       }
       
-      s.addShape(pres.ShapeType.line, { x: 4.2, y: 1.2, w: 0, h: 4.2, line: { color: BORDER_COLOR, width: 1 } });
+      s.addShape(pres.ShapeType.line, { x: 4.5, y: 1.2, w: 0, h: 4.2, line: { color: BORDER_COLOR, width: 1 } });
       
       slide.content.forEach((point, i) => {
-        const yPos = 1.5 + (i * 0.9);
-        // Manual Bullet to match web design perfectly (Green circle)
-        s.addShape(pres.ShapeType.ellipse, { x: 4.45, y: yPos + 0.12, w: 0.08, h: 0.08, fill: { color: ACCENT_COLOR } });
+        const yPos = 1.3 + (i * (slide.content.length > 4 ? 0.7 : 0.9));
+        s.addShape(pres.ShapeType.ellipse, { x: 4.75, y: yPos + 0.12, w: 0.08, h: 0.08, fill: { color: ACCENT_COLOR } });
         s.addText(point, { 
-          x: 4.65, y: yPos, w: 5.0, fontSize: 18, color: TEXT_COLOR, fontFace: "Inter" 
+          x: 4.95, y: yPos, w: 4.5, fontSize: 16, color: TEXT_COLOR, fontFace: "Inter" 
         });
       });
     }
@@ -80,7 +79,6 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
       categoriesToRender.forEach(cat => {
         const items = slide.servicesList?.filter(i => i.category === cat.id);
         if (items && items.length > 0) {
-            // Category Header Box
             s.addShape(pres.ShapeType.rect, { x: colX, y: 1.8, w: colWidth - 0.2, h: 0.4, fill: { color: CARD_BG }, line: { color: BORDER_COLOR, width: 1 } });
             s.addText(cat.title, { 
               x: colX, y: 1.8, w: colWidth - 0.2, h: 0.4, fontSize: 9, color: ACCENT_COLOR, bold: true, align: "center", valign: "middle", fontFace: "Inter" 
