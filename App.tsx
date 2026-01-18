@@ -200,7 +200,7 @@ const BudgetDocumentView: React.FC<{
   }, 0);
 
   return (
-    <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8 print:p-0 print:bg-white">
+    <div className="fixed inset-0 z-[120] bg-zinc-950 overflow-y-auto animate-fade-in p-0 md:p-8 print:p-0 print:bg-white print:static print:overflow-visible">
       <div className="max-w-4xl mx-auto space-y-8 pb-20 print:p-0 print:m-0 print:max-w-none print:space-y-0">
         <div className="flex justify-between items-start no-print p-4 md:p-0">
             <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-all bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-800 font-bold text-xs">
@@ -211,7 +211,8 @@ const BudgetDocumentView: React.FC<{
             </button>
         </div>
 
-        <div className="bg-white text-zinc-900 p-8 md:p-16 shadow-2xl min-h-[1123px] flex flex-col print:shadow-none print:m-0 print:rounded-none print:w-full print:border-none">
+        {/* Proposta Comercial - Formatada como A4 Retrato */}
+        <div className="bg-white text-zinc-900 p-8 md:p-16 shadow-2xl min-h-[1123px] flex flex-col print:shadow-none print:m-0 print:rounded-none print:border-none print-portrait">
             <div className="flex justify-between items-center border-b-2 border-zinc-900 pb-8 mb-12">
                 <Logo className="h-10 w-auto text-zinc-900" />
                 <div className="text-right">
@@ -287,7 +288,7 @@ const BudgetDocumentView: React.FC<{
 
 const PresentationView: React.FC<{ data: PresentationData, clientName: string, projectName: string, onClose: () => void }> = ({ data, clientName, projectName, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in no-scrollbar print:overflow-visible print:bg-black">
+    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in no-scrollbar print:overflow-visible print:bg-black print:static print-container">
       <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent">
         <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all font-bold text-xs uppercase tracking-widest">
           <ArrowLeft className="w-4 h-4" /> Sair
@@ -305,9 +306,9 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
         </div>
       </div>
 
-      <div className="mx-auto pt-24 pb-12 px-4 max-w-6xl space-y-12 slides-container print:pt-0 print:pb-0 print:px-0 print:space-y-0 print:max-w-none">
+      <div className="mx-auto pt-24 pb-12 px-4 max-w-6xl space-y-12 slides-container print:pt-0 print:pb-0 print:px-0 print:space-y-0 print:max-w-none print:static">
         {data.slides.map((slide, index) => (
-          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-8 md:p-16 print-slide overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl print:shadow-none print:rounded-none print:border-none print:aspect-auto">
+          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-8 md:p-16 print-slide print-landscape print-bg-dark overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl print:shadow-none print:rounded-none print:border-none print:aspect-auto">
             {/* Ambient Background - Visível na impressão */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#74fbae]/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-[#74fbae]/3 rounded-full blur-[80px] pointer-events-none" />
