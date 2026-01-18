@@ -10,7 +10,8 @@ export interface ServiceItem {
 }
 
 export interface SelectedService extends ServiceItem {
-  uniqueId: string; // To handle multiple instances if necessary, and for DnD keys
+  uniqueId: string;
+  price?: string; // New field for budget values
 }
 
 export interface CategoryDefinition {
@@ -22,12 +23,12 @@ export interface CategoryDefinition {
 }
 
 export interface PresentationSlide {
-  id: string; // Added for React keys when editing
+  id: string;
   title: string;
   subtitle?: string;
-  content: string[]; // Bullet points
-  type: 'cover' | 'content' | 'closing' | 'service_list';
-  servicesList?: SelectedService[]; // Optional payload for the specific service slide
+  content: string[];
+  type: 'cover' | 'content' | 'closing' | 'service_list' | 'budget';
+  servicesList?: SelectedService[];
 }
 
 export interface PresentationData {

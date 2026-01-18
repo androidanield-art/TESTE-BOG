@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -18,10 +18,26 @@
             colors: {
               zinc: {
                 850: '#1f2937',
+                900: '#18181b',
                 950: '#09090b',
               },
               brand: {
-                green: '#4ade80'
+                green: '#4ade80',
+                dark: '#050505'
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.3s ease-out',
+              'slide-up': 'slideUp 0.4s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
               }
             }
           },
@@ -31,9 +47,11 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #f9fafb; /* zinc-50 */
+        background-color: #09090b; /* Dark bg */
+        color: #e4e4e7;
+        margin: 0;
+        padding: 0;
       }
-      /* Hide scrollbar for cleaner UI */
       .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
@@ -41,22 +59,49 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
+      /* Prevenção de quebra de página em tabelas e itens longos no PDF */
+      @media print {
+        @page {
+            size: landscape;
+            margin: 0;
+        }
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background-color: #09090b !important;
+        }
+        .print-no-break {
+          page-break-inside: avoid;
+        }
+        .no-print {
+          display: none !important;
+        }
+      }
+      
+      /* Glassmorphism Utilities */
+      .glass {
+        background: rgba(24, 24, 27, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
     </style>
   <script type="importmap">
 {
   "imports": {
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
     "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
     "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
-    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
     "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2",
     "clsx": "https://esm.sh/clsx@^2.1.1",
     "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
     "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "pptxgenjs": "https://esm.sh/pptxgenjs@^4.0.1"
   }
 }
 </script>
