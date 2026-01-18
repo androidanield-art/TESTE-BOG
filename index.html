@@ -61,8 +61,10 @@
           background: #09090b !important;
           color-adjust: exact !important;
           -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
 
+        /* Hide everything except the presentation container */
         #root > div:not(.print-container) {
           display: none !important;
         }
@@ -84,6 +86,8 @@
           overflow: hidden !important;
           position: relative !important;
           background: #09090b !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
         .no-print {

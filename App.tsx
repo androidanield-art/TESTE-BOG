@@ -27,7 +27,6 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 function cn(...inputs: (string | undefined | null | false)[]) {
-  // Fix: Ensure clsx is called with spread inputs for better compatibility
   return twMerge(clsx(...inputs));
 }
 
@@ -198,59 +197,62 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
   );
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto print:bg-black print-container">
+    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto print:static print:overflow-visible print:bg-black print-container animate-fade-in">
       
-      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
-        <button onClick={onClose} className="pointer-events-auto flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/80 backdrop-blur px-4 py-2 rounded-full border border-zinc-800 transition-all hover:border-zinc-600">
-          <ArrowLeft className="w-4 h-4" /> Voltar
+      {/* Navigation Controls - Hidden on print */}
+      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent pointer-events-none">
+        <button onClick={onClose} className="pointer-events-auto flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all hover:border-zinc-600 shadow-xl">
+          <ArrowLeft className="w-4 h-4" /> Voltar ao Canvas
         </button>
         <div className="pointer-events-auto flex gap-4">
            <button 
             onClick={() => downloadPPT(data, clientName)}
-            className="flex items-center gap-2 bg-white/10 text-white px-6 py-2 rounded-full font-bold hover:bg-white/20 transition-all border border-white/10 shadow-lg"
+            className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg"
           >
-            <Presentation className="w-4 h-4" /> Baixar PPT
+            <Presentation className="w-4 h-4" /> Exportar PPT
           </button>
-          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#4ade80] text-black px-6 py-2 rounded-full font-bold hover:scale-105 transition-all shadow-[0_0_20px_rgba(74,222,128,0.3)]">
-            <Printer className="w-4 h-4" /> Baixar PDF
+          {/* Ensure window.print() is called with no arguments as per its standard definition to avoid parameter mismatch errors */}
+          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#4ade80] text-black px-7 py-2.5 rounded-full font-bold hover:scale-105 transition-all shadow-[0_0_20px_rgba(74,222,128,0.4)]">
+            <Printer className="w-4 h-4" /> Gerar PDF (Imprimir)
           </button>
         </div>
       </div>
 
-      <div className="max-w-[297mm] mx-auto print:max-w-none print:w-full">
+      <div className="mx-auto print:w-full print:m-0">
         {data.slides.map((slide, index) => (
-          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-16 print:p-12 print-slide overflow-hidden border-b border-zinc-900 print:border-none">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#4ade80]/5 rounded-full blur-[120px] pointer-events-none" />
+          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-20 print:p-12 print-slide overflow-hidden border-b border-zinc-900 print:border-none shadow-inner">
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#4ade80]/5 rounded-full blur-[140px] pointer-events-none opacity-60" />
+            <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none opacity-40" />
             
-            <div className="absolute top-8 left-12"><BrandLogo /></div>
+            <div className="absolute top-10 left-16"><BrandLogo /></div>
             
-            <div className="flex-1 flex flex-col justify-center relative z-10 px-8">
+            <div className="flex-1 flex flex-col justify-center relative z-10 px-12">
               {slide.type === 'cover' && (
                 <div className="max-w-4xl">
-                  <div className="inline-block px-3 py-1 bg-zinc-900/50 border border-zinc-800 rounded-full text-[#4ade80] text-[10px] font-bold uppercase tracking-widest mb-6">
+                  <div className="inline-block px-4 py-1.5 bg-zinc-900/60 border border-zinc-800 rounded-full text-[#4ade80] text-[11px] font-bold uppercase tracking-[0.2em] mb-8">
                     Proposta Estratégica
                   </div>
-                  <h1 className="text-7xl font-black leading-[1] mb-8 text-white tracking-tighter uppercase">
+                  <h1 className="text-[100px] font-black leading-[0.85] mb-10 text-white tracking-tighter uppercase italic">
                     Ecossistema<br/><span className="text-zinc-600">de Growth</span>
                   </h1>
-                  <p className="text-xl text-zinc-400 font-light max-w-2xl border-l-2 border-[#4ade80] pl-6 leading-relaxed">
+                  <p className="text-2xl text-zinc-400 font-light max-w-2xl border-l-4 border-[#4ade80] pl-8 leading-relaxed italic">
                     {slide.subtitle}
                   </p>
                 </div>
               )}
 
               {slide.type === 'content' && (
-                <div className="grid grid-cols-12 gap-12 h-full items-center">
-                  <div className="col-span-4 border-r border-zinc-800 pr-10 flex flex-col justify-center min-h-[300px]">
-                    <h2 className="text-5xl font-black text-[#4ade80] leading-[1.1] mb-6 uppercase break-words">{slide.title}</h2>
-                    <p className="text-lg text-zinc-500 leading-relaxed font-light">{slide.subtitle}</p>
+                <div className="grid grid-cols-12 gap-20 h-full items-center">
+                  <div className="col-span-5 border-r border-zinc-800/50 pr-16 flex flex-col justify-center min-h-[400px]">
+                    <h2 className="text-5xl font-black text-[#4ade80] leading-[1] mb-8 uppercase break-words tracking-tighter">{slide.title}</h2>
+                    <p className="text-xl text-zinc-500 leading-relaxed font-light italic">{slide.subtitle}</p>
                   </div>
-                  <div className="col-span-8 flex flex-col justify-center pl-4">
-                    <ul className="space-y-6">
+                  <div className="col-span-7 flex flex-col justify-center">
+                    <ul className="space-y-8">
                       {slide.content.map((point, i) => (
-                        <li key={i} className="flex items-start gap-4 group">
-                          <div className="mt-2.5 w-1.5 h-1.5 rounded-full bg-zinc-700 group-hover:bg-[#4ade80] transition-colors shrink-0" />
-                          <p className="text-2xl text-zinc-300 font-extralight leading-snug group-hover:text-white transition-colors">
+                        <li key={i} className="flex items-start gap-6 group">
+                          <div className="mt-3.5 w-2 h-2 rounded-full bg-[#4ade80] shadow-[0_0_10px_rgba(74,222,128,0.5)] shrink-0" />
+                          <p className="text-3xl text-zinc-200 font-extralight leading-tight group-hover:text-white transition-colors tracking-tight">
                             {point}
                           </p>
                         </li>
@@ -261,32 +263,32 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
               )}
 
               {slide.type === 'service_list' && (
-                <div className="h-full flex flex-col pt-8">
-                    <div className="mb-10">
-                        <h2 className="text-4xl font-black text-white mb-2 uppercase tracking-tight">{slide.title}</h2>
-                        <p className="text-lg text-zinc-400 font-light max-w-2xl">{slide.subtitle}</p>
+                <div className="h-full flex flex-col pt-12">
+                    <div className="mb-12">
+                        <h2 className="text-5xl font-black text-white mb-3 uppercase tracking-tighter italic">Engrenagens</h2>
+                        <p className="text-xl text-zinc-400 font-light max-w-2xl italic">{slide.subtitle}</p>
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-3 gap-8">
                          {CATEGORIES.map(cat => {
                              const items = slide.servicesList?.filter(s => s.category === cat.id);
                              if (!items || items.length === 0) return null;
                              return (
-                                 <div key={cat.id} className="bg-zinc-900/30 border border-zinc-800 p-6 rounded-2xl flex flex-col gap-4">
-                                     <div className="flex items-center gap-3 mb-2 border-b border-zinc-800 pb-3">
-                                        <div className={cn("p-1.5 rounded bg-zinc-950 border border-zinc-800", 
+                                 <div key={cat.id} className="bg-zinc-900/40 border border-zinc-800 p-8 rounded-[32px] flex flex-col gap-6 backdrop-blur-sm transition-all hover:border-[#4ade80]/30 shadow-2xl">
+                                     <div className="flex items-center gap-4 mb-2 border-b border-zinc-800 pb-5">
+                                        <div className={cn("p-2 rounded-xl bg-zinc-950 border border-zinc-800 shadow-lg", 
                                             cat.id === 'growth' ? 'text-emerald-400' : 
                                             cat.id === 'branding' ? 'text-indigo-400' : 'text-zinc-400'
                                         )}>
                                             {cat.icon}
                                         </div>
-                                        <h3 className="font-bold text-[10px] uppercase tracking-widest text-zinc-500">{cat.title}</h3>
+                                        <h3 className="font-bold text-xs uppercase tracking-[0.2em] text-zinc-500">{cat.title}</h3>
                                      </div>
-                                     <ul className="space-y-2">
+                                     <ul className="space-y-3.5">
                                          {items.map(s => (
-                                             <li key={s.uniqueId} className="flex items-start gap-2 text-zinc-300">
-                                                 <span className="mt-2 w-1 h-1 bg-zinc-600 rounded-full shrink-0" />
-                                                 <span className="text-sm font-medium leading-snug">{s.name}</span>
+                                             <li key={s.uniqueId} className="flex items-start gap-3 text-zinc-300">
+                                                 <span className="mt-2 w-1.5 h-1.5 bg-zinc-700 rounded-full shrink-0 group-hover:bg-[#4ade80]" />
+                                                 <span className="text-base font-semibold leading-snug group-hover:text-white">{s.name}</span>
                                              </li>
                                          ))}
                                      </ul>
@@ -299,24 +301,24 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
 
               {slide.type === 'closing' && (
                 <div className="flex flex-col items-center justify-center text-center h-full">
-                    <h2 className="text-6xl font-black text-white mb-8 tracking-tighter max-w-4xl leading-tight uppercase">
+                    <h2 className="text-8xl font-black text-white mb-10 tracking-tighter max-w-5xl leading-[0.9] uppercase italic">
                         {slide.title}
                     </h2>
-                    <p className="text-2xl text-zinc-400 font-light mb-12 max-w-2xl leading-relaxed">
+                    <p className="text-3xl text-zinc-400 font-light mb-16 max-w-3xl leading-relaxed italic">
                         {slide.subtitle}
                     </p>
-                    <div className="text-left bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl min-w-[360px]">
-                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-3 font-bold">Contato Direto</p>
-                        <p className="text-xl text-[#4ade80] font-mono mb-1">contato@buildongrowth.com</p>
-                        <p className="text-white text-md">Build on Growth Ecosystems</p>
+                    <div className="text-left bg-zinc-900/60 border border-zinc-800 p-10 rounded-[40px] min-w-[450px] shadow-2xl backdrop-blur-md">
+                        <p className="text-xs text-zinc-500 uppercase tracking-[0.3em] mb-5 font-bold">Contato Estratégico</p>
+                        <p className="text-3xl text-[#4ade80] font-mono mb-2 tracking-tighter">contato@buildongrowth.com</p>
+                        <p className="text-white text-xl font-medium">Build on Growth Ecosystems</p>
                     </div>
                 </div>
               )}
             </div>
             
-            <div className="absolute bottom-8 left-12 right-12 flex justify-between text-zinc-700 text-[10px] uppercase tracking-[0.2em] font-bold border-t border-zinc-900 pt-6">
-              <span className="text-zinc-500">{projectName} — {clientName}</span>
-              <span className="text-[#4ade80]">Slide {index + 1}</span>
+            <div className="absolute bottom-10 left-16 right-16 flex justify-between text-zinc-700 text-[11px] uppercase tracking-[0.3em] font-bold border-t border-zinc-900/50 pt-8">
+              <span className="text-zinc-500">{projectName} <span className="mx-2 text-zinc-800">|</span> {clientName}</span>
+              <span className="text-[#4ade80] bg-[#4ade80]/5 px-3 py-1 rounded-full border border-[#4ade80]/10">Slide {index + 1}</span>
             </div>
           </div>
         ))}
@@ -384,17 +386,17 @@ export default function App() {
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex h-screen font-sans overflow-hidden bg-[#09090b] text-zinc-100">
         <aside className="w-80 flex flex-col border-r border-zinc-800 bg-[#0c0c0e] z-10 print:hidden">
-          <div className="p-6 border-b border-zinc-800">
-            <h1 className="text-xl font-black italic tracking-tighter text-white">BUILD ON GROWTH</h1>
+          <div className="p-8 border-b border-zinc-800">
+            <h1 className="text-2xl font-black italic tracking-tighter text-white">BUILD<span className="text-[#4ade80]">ON</span></h1>
             <div className="flex items-center gap-2 mt-2">
                 <div className="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse"></div>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Ecosystem Builder</p>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Ecosystem Builder</p>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-8 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-5 space-y-10 no-scrollbar">
             {CATEGORIES.map(cat => (
               <div key={cat.id}>
-                <h3 className="text-[10px] font-black text-zinc-500 mb-3 tracking-[0.2em] uppercase flex items-center gap-2">
+                <h3 className="text-[10px] font-black text-zinc-500 mb-4 tracking-[0.2em] uppercase flex items-center gap-2">
                     {cat.icon} {cat.title}
                 </h3>
                 {SERVICES.filter(s => s.category === cat.id).map(s => (
@@ -406,31 +408,31 @@ export default function App() {
         </aside>
 
         <main className="flex-1 flex flex-col relative print:hidden">
-          <header className="h-24 border-b border-zinc-800 bg-[#09090b]/80 backdrop-blur-md flex items-center px-10 justify-between z-20">
-            <div className="flex gap-8">
-              <div className="w-64">
-                <p className="text-[9px] font-bold text-[#4ade80] uppercase mb-1 tracking-widest">Empresa Cliente</p>
-                <input value={clientName} onChange={e => setClientName(e.target.value)} className="w-full bg-transparent text-lg font-medium border-b border-zinc-800 focus:border-[#4ade80] outline-none pb-1 text-white placeholder-zinc-700 transition-colors" placeholder="Digite o nome..." />
+          <header className="h-28 border-b border-zinc-800 bg-[#09090b]/90 backdrop-blur-xl flex items-center px-12 justify-between z-20">
+            <div className="flex gap-10">
+              <div className="w-72">
+                <p className="text-[10px] font-bold text-[#4ade80] uppercase mb-2 tracking-[0.2em]">Cliente</p>
+                <input value={clientName} onChange={e => setClientName(e.target.value)} className="w-full bg-transparent text-xl font-medium border-b border-zinc-800 focus:border-[#4ade80] outline-none pb-2 text-white placeholder-zinc-800 transition-all" placeholder="Nome da empresa..." />
               </div>
-              <div className="w-64">
-                <p className="text-[9px] font-bold text-[#4ade80] uppercase mb-1 tracking-widest">Projeto</p>
-                <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full bg-transparent text-lg font-medium border-b border-zinc-800 focus:border-[#4ade80] outline-none pb-1 text-white placeholder-zinc-700 transition-colors" placeholder="Digite o projeto..." />
+              <div className="w-72">
+                <p className="text-[10px] font-bold text-[#4ade80] uppercase mb-2 tracking-[0.2em]">Projeto</p>
+                <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full bg-transparent text-xl font-medium border-b border-zinc-800 focus:border-[#4ade80] outline-none pb-2 text-white placeholder-zinc-800 transition-all" placeholder="Nome do projeto..." />
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-                <button onClick={handleOpenBudget} disabled={cartItems.length === 0} className="flex items-center gap-2 px-4 py-2 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all disabled:opacity-30" title="Definir valores">
+            <div className="flex items-center gap-5">
+                <button onClick={handleOpenBudget} disabled={cartItems.length === 0} className="flex items-center gap-2 px-5 py-2.5 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-xl transition-all disabled:opacity-20" title="Definir valores">
                     <Calculator className="w-5 h-5" />
-                    <span className="text-sm font-medium">Orçamento</span>
+                    <span className="text-sm font-bold uppercase tracking-wider">Orçamento</span>
                 </button>
-                <button onClick={handleGeneratePresentation} disabled={cartItems.length === 0} className="group relative bg-[#4ade80] text-black px-8 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-[#3ecf70] transition-all hover:scale-105 shadow-[0_0_20px_rgba(74,222,128,0.2)] disabled:opacity-30">
+                <button onClick={handleGeneratePresentation} disabled={cartItems.length === 0} className="group relative bg-[#4ade80] text-black px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-[#3ecf70] transition-all hover:scale-105 shadow-[0_0_30px_rgba(74,222,128,0.2)] disabled:opacity-20">
                     <Sparkles className="w-5 h-5" />
                     Gerar Ecossistema
                 </button>
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-12 relative z-0 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-16 relative z-0 no-scrollbar">
             <DroppableZone items={cartItems} onRemove={id => setCartItems(p => p.filter(i => i.uniqueId !== id))} />
           </div>
         </main>
