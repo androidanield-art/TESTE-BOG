@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import {
   DndContext,
@@ -20,11 +18,11 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CATEGORIES, SERVICES } from './constants';
-import { SelectedService, ServiceItem, PresentationData, PresentationSlide } from './types';
+import { SelectedService, ServiceItem, PresentationData } from './types';
 import { generateStaticPresentation } from './services/presentationGenerator';
 import { downloadPPT } from './services/pptGenerator';
 import { Logo } from './Logo';
-import { Plus, Trash2, GripVertical, Printer, ArrowLeft, DollarSign, ShieldCheck, Box, X, Calculator, CheckCircle2, FileVideo, Sparkles, Presentation, MoreHorizontal, ReceiptText } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Printer, ArrowLeft, ShieldCheck, Box, X, Calculator, CheckCircle2, Sparkles, Presentation } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -65,7 +63,7 @@ const SortableCanvasItem: React.FC<{
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <div className={cn("w-1.5 h-1.5 rounded-full", cat?.color.includes('zinc-800') ? 'bg-indigo-500' : cat?.color.includes('black') ? 'bg-emerald-500' : 'bg-zinc-500')} />
+          <div className={cn("w-1.5 h-1.5 rounded-full", cat?.id === 'branding' ? 'bg-indigo-500' : cat?.id === 'growth' ? 'bg-emerald-500' : 'bg-zinc-500')} />
           <span className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold">{cat?.title}</span>
         </div>
         <h3 className="text-sm font-bold text-zinc-200">{service.name}</h3>
@@ -114,8 +112,6 @@ const BudgetModal: React.FC<{
 }> = ({ isOpen, onClose, items, onConfirm }) => {
   const [prices, setPrices] = useState<Record<string, string>>({});
 
-  if (!isOpen) return null;
-
   const handlePriceChange = (id: string, value: string) => {
     setPrices(prev => ({ ...prev, [id]: value }));
   };
@@ -129,32 +125,33 @@ const BudgetModal: React.FC<{
     onClose();
   };
 
-  // Fixed total calculation: explicitly casting Object.values to string[] and typing reduce return to ensure number type
-  const total = (Object.values(prices) as string[]).reduce((acc: number, curr: string): number => {
-    const val = parseFloat(curr.replace(/\./g, '').replace(',', '.') || '0');
+  const total = items.reduce((acc, item) => {
+    const priceStr = prices[item.uniqueId] || item.price || '0';
+    const val = parseFloat(priceStr.replace(/\./g, '').replace(',', '.') || '0');
     return acc + (isNaN(val) ? 0 : val);
   }, 0);
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] animate-slide-up">
+      <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         <div className="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/50 rounded-t-2xl">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Calculator className="w-5 h-5 text-[#74fbae]" />
               Calculadora de Investimento
             </h2>
-            <p className="text-xs text-zinc-400 mt-1">Valores serão refletidos no slide de proposta comercial.</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-zinc-500 hover:text-white">
             <X className="w-6 h-6" />
           </button>
         </div>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {items.map(item => (
-            <div key={item.uniqueId} className="flex items-center justify-between p-4 bg-zinc-950/30 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors">
-              <div>
+            <div key={item.uniqueId} className="flex items-center justify-between p-4 bg-zinc-950/30 border border-zinc-800 rounded-lg">
+              <div className="flex-1 pr-4">
                 <p className="text-sm font-semibold text-zinc-200">{item.name}</p>
                 <p className="text-[10px] text-zinc-500">{item.description}</p>
               </div>
@@ -174,14 +171,13 @@ const BudgetModal: React.FC<{
 
         <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 rounded-b-2xl flex justify-between items-center">
           <div>
-            <p className="text-xs text-zinc-500 uppercase font-bold">Total Estimado</p>
-            <p className="text-2xl font-bold text-[#74fbae]">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}</p>
+            <p className="text-[10px] text-zinc-500 uppercase font-bold">Total Estimado</p>
+            <p className="text-2xl font-bold text-[#74fbae]">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(total)}</p>
           </div>
           <button 
             onClick={handleSubmit}
-            className="bg-zinc-100 text-black px-8 py-3 rounded-full font-bold hover:bg-[#74fbae] transition-all hover:scale-105 flex items-center gap-2"
+            className="bg-zinc-100 text-black px-8 py-3 rounded-full font-bold hover:bg-[#74fbae] transition-all"
           >
-            <CheckCircle2 className="w-5 h-5" />
             Salvar Orçamento
           </button>
         </div>
@@ -192,63 +188,57 @@ const BudgetModal: React.FC<{
 
 const PresentationView: React.FC<{ data: PresentationData, clientName: string, projectName: string, onClose: () => void }> = ({ data, clientName, projectName, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto print:static print:overflow-visible print:bg-black print-container animate-fade-in">
-      
-      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent pointer-events-none">
-        <button onClick={onClose} className="pointer-events-auto flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all hover:border-zinc-600 shadow-xl">
+    <div className="fixed inset-0 z-[100] bg-black overflow-y-auto animate-fade-in">
+      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-[110] no-print bg-gradient-to-b from-black/90 to-transparent">
+        <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white bg-zinc-900/90 backdrop-blur px-5 py-2.5 rounded-full border border-zinc-800 transition-all">
           <ArrowLeft className="w-4 h-4" /> Voltar ao Canvas
         </button>
-        <div className="pointer-events-auto flex gap-4">
+        <div className="flex gap-4">
            <button 
             onClick={() => downloadPPT(data, clientName)}
             className="flex items-center gap-2 bg-zinc-900/90 text-white px-6 py-2.5 rounded-full font-bold hover:bg-zinc-800 transition-all border border-zinc-700 shadow-lg"
           >
             <Presentation className="w-4 h-4" /> Exportar PPT
           </button>
-          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#74fbae] text-black px-7 py-2.5 rounded-full font-bold hover:scale-105 transition-all shadow-[0_0_20px_rgba(116,251,174,0.4)]">
-            <Printer className="w-4 h-4" /> Gerar PDF (Imprimir)
+          <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#74fbae] text-black px-7 py-2.5 rounded-full font-bold hover:scale-105 transition-all">
+            <Printer className="w-4 h-4" /> Gerar PDF
           </button>
         </div>
       </div>
 
-      <div className="mx-auto print:w-full print:m-0">
+      <div className="mx-auto pt-24 pb-12 px-4 max-w-6xl space-y-12">
         {data.slides.map((slide, index) => (
-          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-20 print:p-12 print-slide overflow-hidden border-b border-zinc-900 print:border-none shadow-inner">
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#74fbae]/5 rounded-full blur-[140px] pointer-events-none opacity-60" />
+          <div key={slide.id || index} className="relative w-full aspect-[16/9] bg-[#09090b] text-white flex flex-col p-16 print:p-12 print-slide overflow-hidden border border-zinc-800 rounded-2xl shadow-2xl">
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#74fbae]/5 rounded-full blur-[100px] pointer-events-none" />
             
-            <div className="absolute top-10 left-16">
-               <Logo className="h-10 w-auto" />
+            <div className="absolute top-10 left-12">
+               <Logo className="h-8 w-auto" />
             </div>
             
-            <div className="flex-1 flex flex-col justify-center relative z-10 px-12">
+            <div className="flex-1 flex flex-col justify-center relative z-10">
               {slide.type === 'cover' && (
                 <div className="max-w-4xl">
-                  <div className="inline-block px-4 py-1.5 bg-zinc-900/60 border border-zinc-800 rounded-full text-[#74fbae] text-[11px] font-bold uppercase tracking-[0.2em] mb-8">
-                    Proposta Estratégica
-                  </div>
-                  <h1 className="text-[100px] font-black leading-[0.85] mb-10 text-white tracking-tighter uppercase italic">
+                  <h1 className="text-[80px] font-black leading-[0.85] mb-8 text-white tracking-tighter uppercase italic">
                     Ecossistema<br/><span className="text-zinc-600">de Growth</span>
                   </h1>
-                  <p className="text-2xl text-zinc-400 font-light max-w-2xl border-l-4 border-[#74fbae] pl-8 leading-relaxed italic">
+                  <p className="text-xl text-zinc-400 font-light border-l-4 border-[#74fbae] pl-6 italic">
                     {slide.subtitle}
                   </p>
                 </div>
               )}
 
               {slide.type === 'content' && (
-                <div className="grid grid-cols-12 gap-20 h-full items-center">
-                  <div className="col-span-5 border-r border-zinc-800/50 pr-16 flex flex-col justify-center min-h-[400px]">
-                    <h2 className="text-5xl font-black text-[#74fbae] leading-[1] mb-8 uppercase break-words tracking-tighter">{slide.title}</h2>
-                    <p className="text-xl text-zinc-500 leading-relaxed font-light italic">{slide.subtitle}</p>
+                <div className="grid grid-cols-12 gap-12 h-full items-center">
+                  <div className="col-span-5 border-r border-zinc-800/50 pr-12">
+                    <h2 className="text-4xl font-black text-[#74fbae] leading-tight mb-6 uppercase italic">{slide.title}</h2>
+                    <p className="text-lg text-zinc-500 font-light italic">{slide.subtitle}</p>
                   </div>
-                  <div className="col-span-7 flex flex-col justify-center">
-                    <ul className="space-y-8">
+                  <div className="col-span-7">
+                    <ul className="space-y-6">
                       {slide.content.map((point, i) => (
-                        <li key={i} className="flex items-start gap-6 group">
-                          <div className="mt-3.5 w-2 h-2 rounded-full bg-[#74fbae] shadow-[0_0_10px_rgba(116,251,174,0.5)] shrink-0" />
-                          <p className="text-3xl text-zinc-200 font-extralight leading-tight group-hover:text-white transition-colors tracking-tight">
-                            {point}
-                          </p>
+                        <li key={i} className="flex items-start gap-4">
+                          <div className="mt-2.5 w-1.5 h-1.5 rounded-full bg-[#74fbae] shrink-0" />
+                          <p className="text-xl text-zinc-200 font-light tracking-tight">{point}</p>
                         </li>
                       ))}
                     </ul>
@@ -257,32 +247,19 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
               )}
 
               {slide.type === 'service_list' && (
-                <div className="h-full flex flex-col pt-12">
-                    <div className="mb-12">
-                        <h2 className="text-5xl font-black text-white mb-3 uppercase tracking-tighter italic">Engrenagens</h2>
-                        <p className="text-xl text-zinc-400 font-light max-w-2xl italic">{slide.subtitle}</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-8">
+                <div className="h-full flex flex-col pt-8">
+                    <h2 className="text-4xl font-black text-white mb-8 uppercase italic">As Engrenagens</h2>
+                    <div className="grid grid-cols-3 gap-6">
                          {CATEGORIES.map(cat => {
                              const items = slide.servicesList?.filter(s => s.category === cat.id);
                              if (!items || items.length === 0) return null;
                              return (
-                                 <div key={cat.id} className="bg-zinc-900/40 border border-zinc-800 p-8 rounded-[32px] flex flex-col gap-6 backdrop-blur-sm transition-all hover:border-[#74fbae]/30 shadow-2xl">
-                                     <div className="flex items-center gap-4 mb-2 border-b border-zinc-800 pb-5">
-                                        <div className={cn("p-2 rounded-xl bg-zinc-950 border border-zinc-800 shadow-lg", 
-                                            cat.id === 'growth' ? 'text-emerald-400' : 
-                                            cat.id === 'branding' ? 'text-indigo-400' : 'text-zinc-400'
-                                        )}>
-                                            {cat.icon}
-                                        </div>
-                                        <h3 className="font-bold text-xs uppercase tracking-[0.2em] text-zinc-500">{cat.title}</h3>
-                                     </div>
-                                     <ul className="space-y-3.5">
+                                 <div key={cat.id} className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-2xl">
+                                     <h3 className="font-bold text-[10px] uppercase tracking-widest text-zinc-500 mb-4 border-b border-zinc-800 pb-3">{cat.title}</h3>
+                                     <ul className="space-y-2">
                                          {items.map(s => (
-                                             <li key={s.uniqueId} className="flex items-start gap-3 text-zinc-300">
-                                                 <span className="mt-2 w-1.5 h-1.5 bg-zinc-700 rounded-full shrink-0 group-hover:bg-[#74fbae]" />
-                                                 <span className="text-base font-semibold leading-snug group-hover:text-white">{s.name}</span>
+                                             <li key={s.uniqueId} className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
+                                                 <span className="w-1 h-1 bg-[#74fbae] rounded-full" /> {s.name}
                                              </li>
                                          ))}
                                      </ul>
@@ -294,51 +271,34 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
               )}
 
               {slide.type === 'budget' && (
-                <div className="h-full flex flex-col pt-8">
-                  <div className="flex justify-between items-end mb-10">
-                    <div>
-                      <h2 className="text-5xl font-black text-[#74fbae] mb-2 uppercase tracking-tighter italic">Proposta Comercial</h2>
-                      <p className="text-xl text-zinc-400 font-light italic">{slide.subtitle}</p>
-                    </div>
-                    <div className="bg-[#74fbae] text-black px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">
-                      Documento Oficial
-                    </div>
-                  </div>
-
-                  <div className="flex-1 overflow-hidden bg-zinc-900/40 border border-zinc-800 rounded-[32px] backdrop-blur-md shadow-2xl flex flex-col">
-                    <div className="grid grid-cols-12 gap-4 p-6 border-b border-zinc-800 bg-zinc-950/40 text-[10px] uppercase tracking-[0.2em] font-black text-zinc-500">
-                      <div className="col-span-1 text-center">#</div>
-                      <div className="col-span-7">Módulo / Serviço</div>
-                      <div className="col-span-4 text-right">Investimento (BRL)</div>
+                <div className="h-full flex flex-col pt-4">
+                  <h2 className="text-4xl font-black text-[#74fbae] mb-6 uppercase italic">Proposta Comercial</h2>
+                  <div className="flex-1 bg-zinc-950/40 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col">
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-zinc-800 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                      <div className="col-span-8">Serviço</div>
+                      <div className="col-span-4 text-right">Investimento</div>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
-                      {slide.servicesList?.map((service, idx) => (
-                        <div key={service.uniqueId} className="grid grid-cols-12 gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors items-center border border-transparent hover:border-zinc-800">
-                          <div className="col-span-1 text-center text-zinc-600 font-mono">{String(idx + 1).padStart(2, '0')}</div>
-                          <div className="col-span-7">
-                            <p className="text-sm font-bold text-zinc-100 uppercase tracking-tight">{service.name}</p>
-                            <p className="text-[10px] text-zinc-500 font-light italic">{service.description}</p>
-                          </div>
-                          <div className="col-span-4 text-right font-mono text-lg text-white font-bold">
-                            R$ {service.price || '0,00'}
-                          </div>
+                      {slide.servicesList?.map((service) => (
+                        <div key={service.uniqueId} className="grid grid-cols-12 gap-4 items-center">
+                          <div className="col-span-8 text-sm font-bold text-zinc-100">{service.name}</div>
+                          <div className="col-span-4 text-right font-mono text-sm text-white">R$ {service.price || '0,00'}</div>
                         </div>
                       ))}
                     </div>
-                    <div className="p-8 border-t border-zinc-800 bg-zinc-950/60 flex justify-between items-center">
-                      <div className="space-y-1">
+                    <div className="p-6 border-t border-zinc-800 bg-zinc-950/60 flex justify-between items-center">
+                      <div className="text-[10px] text-zinc-500 space-y-1">
                         {slide.content.map((note, i) => (
-                          <p key={i} className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                          <p key={i} className="flex items-center gap-2 uppercase tracking-tighter">
                              <ShieldCheck className="w-3 h-3 text-[#74fbae]" /> {note}
                           </p>
                         ))}
                       </div>
                       <div className="text-right">
-                        <p className="text-[10px] text-zinc-500 uppercase font-black tracking-[0.3em] mb-1">Investimento Total</p>
-                        <p className="text-5xl font-black text-[#74fbae] tracking-tighter">
-                          R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
-                            (slide.servicesList || []).reduce((acc: number, curr: SelectedService): number => {
-                              // Fixed price parsing: handle undefined price safely
+                        <p className="text-[10px] text-zinc-500 uppercase font-black mb-1">Total</p>
+                        <p className="text-4xl font-black text-[#74fbae]">
+                          R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(
+                            (slide.servicesList || []).reduce((acc, curr) => {
                               const val = parseFloat((curr.price || '0').replace(/\./g, '').replace(',', '.') || '0');
                               return acc + (isNaN(val) ? 0 : val);
                             }, 0)
@@ -352,24 +312,14 @@ const PresentationView: React.FC<{ data: PresentationData, clientName: string, p
 
               {slide.type === 'closing' && (
                 <div className="flex flex-col items-center justify-center text-center h-full">
-                    <h2 className="text-8xl font-black text-white mb-10 tracking-tighter max-w-5xl leading-[0.9] uppercase italic">
-                        {slide.title}
-                    </h2>
-                    <p className="text-3xl text-zinc-400 font-light mb-16 max-w-3xl leading-relaxed italic">
-                        {slide.subtitle}
-                    </p>
-                    <div className="text-left bg-zinc-900/60 border border-zinc-800 p-10 rounded-[40px] min-w-[450px] shadow-2xl backdrop-blur-md">
-                        <p className="text-xs text-zinc-500 uppercase tracking-[0.3em] mb-5 font-bold">Contato Estratégico</p>
-                        <p className="text-3xl text-[#74fbae] font-mono mb-2 tracking-tighter">contato@buildongrowth.com</p>
-                        <p className="text-white text-xl font-medium">Build on Growth Ecosystems</p>
+                    <h2 className="text-6xl font-black text-white mb-8 tracking-tighter uppercase italic">{slide.title}</h2>
+                    <p className="text-2xl text-zinc-400 font-light mb-12 italic">{slide.subtitle}</p>
+                    <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-3xl min-w-[350px]">
+                        <p className="text-2xl text-[#74fbae] font-mono mb-1">contato@buildongrowth.com</p>
+                        <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Build on Growth Ecosystems</p>
                     </div>
                 </div>
               )}
-            </div>
-            
-            <div className="absolute bottom-10 left-16 right-16 flex justify-between text-zinc-700 text-[11px] uppercase tracking-[0.3em] font-bold border-t border-zinc-900/50 pt-8">
-              <span className="text-zinc-500">{projectName} <span className="mx-2 text-zinc-800">|</span> {clientName}</span>
-              <span className="text-[#74fbae] bg-[#74fbae]/5 px-3 py-1 rounded-full border border-[#74fbae]/10">Slide {index + 1}</span>
             </div>
           </div>
         ))}
@@ -399,11 +349,13 @@ export default function App() {
     const { active, over } = event;
     setActiveDragItem(null);
     if (!over) return;
-    if (SERVICES.find(s => s.id === active.id) && over.id === 'canvas-droppable') {
-      const service = SERVICES.find(s => s.id === active.id);
-      if (service) setCartItems(prev => [...prev, { ...service, uniqueId: `${service.id}-${Date.now()}` }]);
+
+    const sidebarItem = SERVICES.find(s => s.id === active.id);
+    if (sidebarItem && over.id === 'canvas-droppable') {
+      setCartItems(prev => [...prev, { ...sidebarItem, uniqueId: `${sidebarItem.id}-${Date.now()}`, price: '0,00' }]);
       return;
     } 
+
     if (active.id !== over.id) {
       setCartItems(items => {
         const oldIndex = items.findIndex(i => i.uniqueId === active.id);
@@ -413,23 +365,12 @@ export default function App() {
     }
   };
 
-  const handleOpenBudget = () => {
-    if (cartItems.length === 0) { alert("Adicione serviços ao canvas primeiro."); return; }
-    setIsBudgetOpen(true);
-  };
-
-  const handleBudgetConfirm = (itemsWithPrices: SelectedService[]) => {
-      setCartItems(itemsWithPrices);
-      setIsBudgetOpen(false);
-  };
-
   const handleGeneratePresentation = () => {
     if (cartItems.length === 0 || !clientName || !projectName) {
         alert("Preencha cliente, projeto e selecione serviços.");
         return;
     }
-    const baseData = generateStaticPresentation(cartItems, clientName, projectName);
-    setPresentationData(baseData);
+    setPresentationData(generateStaticPresentation(cartItems, clientName, projectName));
     setShowPresentation(true);
   };
 
@@ -438,17 +379,14 @@ export default function App() {
       <div className="flex h-screen font-sans overflow-hidden bg-[#09090b] text-zinc-100">
         <aside className="w-80 flex flex-col border-r border-zinc-800 bg-[#0c0c0e] z-10 print:hidden">
           <div className="p-8 border-b border-zinc-800">
-            <Logo className="h-12 w-auto" />
-            <div className="flex items-center gap-2 mt-4">
-                <div className="w-2 h-2 rounded-full bg-[#74fbae] animate-pulse"></div>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Ecosystem Builder</p>
-            </div>
+            <Logo className="h-10 w-auto" />
+            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] mt-2">Builder</p>
           </div>
-          <div className="flex-1 overflow-y-auto p-5 space-y-10 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-5 space-y-8 no-scrollbar">
             {CATEGORIES.map(cat => (
               <div key={cat.id}>
-                <h3 className="text-[10px] font-black text-zinc-500 mb-4 tracking-[0.2em] uppercase flex items-center gap-2">
-                    {cat.icon} {cat.title}
+                <h3 className="text-[10px] font-black text-zinc-500 mb-4 tracking-widest uppercase flex items-center gap-2 opacity-50">
+                    {cat.title}
                 </h3>
                 {SERVICES.filter(s => s.category === cat.id).map(s => (
                   <DraggableItem key={s.id} service={s} />
@@ -459,31 +397,29 @@ export default function App() {
         </aside>
 
         <main className="flex-1 flex flex-col relative print:hidden">
-          <header className="h-28 border-b border-zinc-800 bg-[#09090b]/90 backdrop-blur-xl flex items-center px-12 justify-between z-20">
-            <div className="flex gap-10">
-              <div className="w-72">
-                <p className="text-[10px] font-bold text-[#74fbae] uppercase mb-2 tracking-[0.2em]">Cliente</p>
-                <input value={clientName} onChange={e => setClientName(e.target.value)} className="w-full bg-transparent text-xl font-medium border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-2 text-white placeholder-zinc-800 transition-all" placeholder="Nome da empresa..." />
+          <header className="h-24 border-b border-zinc-800 bg-[#09090b]/80 backdrop-blur-xl flex items-center px-12 justify-between z-20">
+            <div className="flex gap-8">
+              <div className="w-64">
+                <p className="text-[9px] font-bold text-[#74fbae] uppercase mb-1 tracking-widest">Cliente</p>
+                <input value={clientName} onChange={e => setClientName(e.target.value)} className="w-full bg-transparent border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-1 text-white placeholder-zinc-800" placeholder="Nome..." />
               </div>
-              <div className="w-72">
-                <p className="text-[10px] font-bold text-[#74fbae] uppercase mb-2 tracking-[0.2em]">Projeto</p>
-                <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full bg-transparent text-xl font-medium border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-2 text-white placeholder-zinc-800 transition-all" placeholder="Nome do projeto..." />
+              <div className="w-64">
+                <p className="text-[9px] font-bold text-[#74fbae] uppercase mb-1 tracking-widest">Projeto</p>
+                <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full bg-transparent border-b border-zinc-800 focus:border-[#74fbae] outline-none pb-1 text-white placeholder-zinc-800" placeholder="Projeto..." />
               </div>
             </div>
             
-            <div className="flex items-center gap-5">
-                <button onClick={handleOpenBudget} disabled={cartItems.length === 0} className="flex items-center gap-2 px-5 py-2.5 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-xl transition-all disabled:opacity-20" title="Definir valores">
+            <div className="flex items-center gap-4">
+                <button onClick={() => setIsBudgetOpen(true)} disabled={cartItems.length === 0} className="p-3 text-zinc-500 hover:text-white transition-all disabled:opacity-20">
                     <Calculator className="w-5 h-5" />
-                    <span className="text-sm font-bold uppercase tracking-wider">Orçamento</span>
                 </button>
-                <button onClick={handleGeneratePresentation} disabled={cartItems.length === 0} className="group relative bg-[#74fbae] text-black px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-[#3ecf70] transition-all hover:scale-105 shadow-[0_0_30px_rgba(116,251,174,0.2)] disabled:opacity-20">
-                    <Sparkles className="w-5 h-5" />
-                    Gerar Ecossistema
+                <button onClick={handleGeneratePresentation} disabled={cartItems.length === 0} className="bg-[#74fbae] text-black px-8 py-3 rounded-full font-black uppercase tracking-widest text-[10px] flex items-center gap-2 hover:scale-105 transition-all disabled:opacity-20 shadow-lg">
+                    <Sparkles className="w-4 h-4" /> Gerar Proposta
                 </button>
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-16 relative z-0 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-12 no-scrollbar">
             <DroppableZone items={cartItems} onRemove={id => setCartItems(p => p.filter(i => i.uniqueId !== id))} />
           </div>
         </main>
@@ -493,7 +429,7 @@ export default function App() {
         {activeDragItem ? <SidebarItem service={activeDragItem} isOverlay /> : null}
       </DragOverlay>
 
-      <BudgetModal isOpen={isBudgetOpen} onClose={() => setIsBudgetOpen(false)} items={cartItems} onConfirm={handleBudgetConfirm} />
+      <BudgetModal isOpen={isBudgetOpen} onClose={() => setIsBudgetOpen(false)} items={cartItems} onConfirm={setCartItems} />
 
       {showPresentation && presentationData && (
         <PresentationView data={presentationData} clientName={clientName} projectName={projectName} onClose={() => setShowPresentation(false)} />

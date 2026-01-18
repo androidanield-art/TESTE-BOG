@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Service Canvas Builder</title>
     
-    <!-- Tailwind via CDN para prototipagem rápida -->
+    <!-- Tailwind via CDN apenas para o estado de carregamento/fallback -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="index.css">
-
     <script>
       window.tailwind.config = {
         theme: {
@@ -22,14 +20,6 @@
             colors: {
               zinc: { 850: '#1f2937', 900: '#18181b', 950: '#09090b' },
               brand: { green: '#74fbae', dark: '#050505' }
-            },
-            animation: {
-              'fade-in': 'fadeIn 0.2s ease-out',
-              'slide-up': 'slideUp 0.3s ease-out',
-            },
-            keyframes: {
-              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-              slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
             }
           },
         },
@@ -59,13 +49,6 @@
         animation: pulse 1.5s infinite;
       }
       @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      
-      @media print {
-        @page { size: landscape; margin: 0; }
-        .no-print { display: none !important; }
-        .print-slide { height: 100vh; width: 100vw; page-break-after: always; background: #09090b !important; }
-      }
     </style>
   <script type="importmap">
 {
@@ -88,6 +71,7 @@
 </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="index.tsx"></script>
+    <!-- O Vite transformará este index.tsx em um arquivo .js compatível durante o build -->
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
