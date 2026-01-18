@@ -24,7 +24,7 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
     ]
   });
 
-  data.slides.forEach((slide) => {
+  data.slides.forEach((slide, index) => {
     const s = pres.addSlide({ masterName: "MASTER_SLIDE" });
 
     // Footer Info
@@ -61,8 +61,11 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
       s.addShape(pres.ShapeType.line, { x: 4.2, y: 1.2, w: 0, h: 4.2, line: { color: BORDER_COLOR, width: 1 } });
       
       slide.content.forEach((point, i) => {
+        const yPos = 1.5 + (i * 0.9);
+        // Manual Bullet to match web design perfectly (Green circle)
+        s.addShape(pres.ShapeType.ellipse, { x: 4.45, y: yPos + 0.12, w: 0.08, h: 0.08, fill: { color: ACCENT_COLOR } });
         s.addText(point, { 
-          x: 4.6, y: 1.5 + (i * 0.9), w: 5.0, fontSize: 18, color: TEXT_COLOR, bullet: { code: "2022", color: ACCENT_COLOR }, fontFace: "Inter" 
+          x: 4.65, y: yPos, w: 5.0, fontSize: 18, color: TEXT_COLOR, fontFace: "Inter" 
         });
       });
     }
@@ -84,10 +87,11 @@ export const downloadPPT = (data: PresentationData, clientName: string) => {
             });
             
             items.forEach((item, k) => {
+                const itemY = 2.4 + (k * 0.45);
+                s.addShape(pres.ShapeType.ellipse, { x: colX + 0.05, y: itemY + 0.08, w: 0.04, h: 0.04, fill: { color: ACCENT_COLOR } });
                 s.addText(item.name, { 
-                  x: colX + 0.1, y: 2.4 + (k * 0.45), w: colWidth - 0.4, fontSize: 11, color: TEXT_COLOR, bold: true, fontFace: "Inter" 
+                  x: colX + 0.15, y: itemY, w: colWidth - 0.4, fontSize: 11, color: TEXT_COLOR, bold: true, fontFace: "Inter" 
                 });
-                s.addShape(pres.ShapeType.ellipse, { x: colX + 0.05, y: 2.48 + (k * 0.45), w: 0.04, h: 0.04, fill: { color: ACCENT_COLOR } });
             });
             colX += colWidth;
         }
